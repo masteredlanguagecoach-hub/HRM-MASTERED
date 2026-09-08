@@ -1,0 +1,13 @@
+{
+  "name": "hrms-ai-system",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Production-ready AI-Powered Human Resource Management System with Google Sheets DB & Google Drive Storage",
+  "main": "server.js",
+  "scripts": {
+    "start": "& \"C:\\Users\\user\\AppData\\Roaming\\Antigravity\\bin\\agy-node.cmd\" server.js"
+  },
+  "keywords": ["hrms", "recruitment", "ai-cv-screening", "google-sheets-db", "google-drive"],
+  "author": "Antigravity Engineering",
+  "license": "MIT"
+}

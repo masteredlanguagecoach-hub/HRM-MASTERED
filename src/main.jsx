@@ -1,4 +1,4 @@
-// Main Application Bootstrap Entrypoint (AppShell Layout, Public Careers Portal & Fail-Closed Loading Guard)
+// Main Application Bootstrap Entrypoint (AppShell Layout, Public Careers Portal, LoginPage & Fail-Closed Loading Guard)
 
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
@@ -9,6 +9,7 @@ import { AccessDenied } from './components/common/AccessDenied.jsx';
 import { LoadingState } from './components/common/UIComponents.jsx';
 import { PAGE_PERMISSION_MAP } from './config/constants.js';
 
+import { LoginPage } from './pages/LoginPage.jsx';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 import { RecruitmentPage } from './pages/RecruitmentPage.jsx';
 import { OnboardingPage } from './pages/OnboardingPage.jsx';
@@ -35,7 +36,7 @@ function MainContent() {
 
   // Auto-redirect if active tab becomes unauthorized after role change
   useEffect(() => {
-    if (isAuthLoading || isPublicCareersRoute) return;
+    if (isAuthLoading || isPublicCareersRoute || !currentUser) return;
     const requiredPermissions = PAGE_PERMISSION_MAP[activeTab];
     if (requiredPermissions && !hasAnyPermission(requiredPermissions)) {
       const firstAllowed = Object.keys(PAGE_PERMISSION_MAP).find(page => hasAnyPermission(PAGE_PERMISSION_MAP[page]));
@@ -45,6 +46,7 @@ function MainContent() {
     }
   }, [currentUser?.Role, activeTab, isAuthLoading, isPublicCareersRoute]);
 
+  // 1. PUBLIC ROUTES: Careers Portal accessible without account
   if (isPublicCareersRoute) {
     let jobId = null;
     if (window.location.pathname.includes('/jobs/')) {
@@ -53,11 +55,17 @@ function MainContent() {
     return <PublicCareersPage initialRoute="/careers" jobId={jobId} />;
   }
 
-  const renderPage = () => {
-    if (isAuthLoading) {
-      return <LoadingState message="Verifying role-based workspace permissions..." />;
-    }
+  // 2. LOADING STATE
+  if (isAuthLoading) {
+    return <LoadingState message="Verifying role-based workspace session..." />;
+  }
 
+  // 3. UNAUTHENTICATED VISITORS REDIRECTED TO LOGIN PAGE
+  if (!currentUser || currentUser.Status !== 'ACTIVE') {
+    return <LoginPage />;
+  }
+
+  const renderPage = () => {
     const requiredPermissions = PAGE_PERMISSION_MAP[activeTab];
 
     if (requiredPermissions && !hasAnyPermission(requiredPermissions)) {

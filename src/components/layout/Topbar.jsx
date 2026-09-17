@@ -1,13 +1,13 @@
-// Application Topbar Header Component (Single Row Layout, Search, Sync Status, Notifications & Accessible Account Menu)
+// Application Topbar Header Component (Single Row Layout, Search, Sync Status, Notifications & Accessible Account Menu with Sign Out)
 
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useApp } from '../../context/AppContext.jsx';
-import { SVGIcon } from '../common/UIComponents.jsx';
+import { SVGIcon, Button } from '../common/UIComponents.jsx';
 import { ROLES } from '../../config/constants.js';
 
 export function Topbar({ onToggleMobileSidebar }) {
-  const { currentUser, switchRole, hasPermission } = useAuth();
+  const { currentUser, switchRole, logout, hasPermission } = useAuth();
   const { activeTab, setActiveTab, searchQuery, setSearchQuery, syncStatus, notifications } = useApp();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -130,22 +130,24 @@ export function Topbar({ onToggleMobileSidebar }) {
             </div>
             <div className="account-info">
               <span className="account-name">{currentUser?.FullName || 'User'}</span>
-              <span className="account-role">{role.replace('_', ' ')}</span>
+              <span className="account-role">{role.replace(/_/g, ' ')}</span>
             </div>
           </button>
 
           {showAccountMenu && (
-            <div className="topbar-dropdown account-dropdown">
-              <div className="dropdown-user-details">
-                <div className="user-email">{currentUser?.Email}</div>
-                <div className="user-emp-id">Employee ID: {currentUser?.EmployeeID || 'N/A'}</div>
+            <div className="topbar-dropdown account-dropdown" style={{ width: '280px', padding: '16px' }}>
+              <div className="dropdown-user-details" style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--slate-200)' }}>
+                <div style={{ fontWeight: '700', fontSize: '14px', color: 'var(--slate-900)' }}>{currentUser?.FullName}</div>
+                <div className="user-email" style={{ fontSize: '12px', color: 'var(--slate-500)' }}>{currentUser?.Email}</div>
+                <div className="user-emp-id" style={{ fontSize: '11px', color: 'var(--slate-400)', marginTop: '2px' }}>ID: {currentUser?.EmployeeID || 'N/A'}</div>
               </div>
 
               {isDev && (
-                <div className="dropdown-dev-switch">
-                  <div className="dev-switch-title">Dev Role Simulator:</div>
+                <div className="dropdown-dev-switch" style={{ marginBottom: '16px' }}>
+                  <div className="dev-switch-title" style={{ fontSize: '11px', fontWeight: '700', color: 'var(--slate-600)', marginBottom: '4px' }}>Dev Role Simulator:</div>
                   <select
-                    className="dev-role-select"
+                    className="dev-role-select form-select"
+                    style={{ fontSize: '12px', padding: '6px' }}
                     value={role}
                     onChange={(e) => {
                       switchRole(e.target.value);
@@ -164,6 +166,19 @@ export function Topbar({ onToggleMobileSidebar }) {
                   </select>
                 </div>
               )}
+
+              <Button
+                variant="danger"
+                size="sm"
+                icon="close"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  setShowAccountMenu(false);
+                  logout();
+                }}
+              >
+                Sign Out of Workspace
+              </Button>
             </div>
           )}
         </div>

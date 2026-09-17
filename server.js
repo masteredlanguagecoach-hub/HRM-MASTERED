@@ -64,6 +64,7 @@ function ensureCompiledBundle() {
       'src/components/cv/CandidateProfileModal.jsx',
       'src/components/cv/CandidateComparisonModal.jsx',
       'src/pages/PublicCareersPage.jsx',
+      'src/pages/LoginPage.jsx',
       'src/pages/DashboardPage.jsx',
       'src/pages/RecruitmentPage.jsx',
       'src/pages/OnboardingPage.jsx',
@@ -145,8 +146,8 @@ const server = http.createServer((req, res) => {
   const safePath = path.normalize(reqPath).replace(/^(\.\.[\/\\])+/, '');
   let filePath = path.join(PROJECT_ROOT, 'public', safePath);
 
-  // If path has no extension or starts with /careers, serve public/index.html (SPA routing)
-  if (!path.extname(safePath) || reqPath.startsWith('/careers')) {
+  // If path has no extension or starts with /careers or /login, serve public/index.html (SPA routing)
+  if (!path.extname(safePath) || reqPath.startsWith('/careers') || reqPath.startsWith('/login')) {
     filePath = path.join(PROJECT_ROOT, 'public', 'index.html');
   }
 

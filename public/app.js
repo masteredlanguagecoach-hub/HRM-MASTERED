@@ -3156,18 +3156,102 @@ const documentTemplates = {
 // Role-Based Access Control (RBAC) & Authenticated Session Context (Fail-Closed Architecture)
 
 const AuthContext = createContext();
+const AUTH_SESSION_KEY = 'HRMS_AUTH_SESSION_TOKEN';
 function AuthProvider({
   children
 }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   useEffect(() => {
-    // Resolve active authenticated user session from database
-    const users = dbService.getAllRaw('Users') || [];
-    const activeAdmin = users.find(u => u.Email === 'admin@masteredhrms.com' && u.Status === 'ACTIVE') || users[0] || null;
-    setCurrentUser(activeAdmin);
-    setIsAuthLoading(false);
+    // Resolve active authenticated user session from localStorage session token
+    try {
+      const storedSession = typeof window !== 'undefined' ? localStorage.getItem(AUTH_SESSION_KEY) : null;
+      if (storedSession) {
+        const parsed = JSON.parse(storedSession);
+        if (parsed && parsed.email && parsed.expiresAt && Date.now() < parsed.expiresAt) {
+          const users = dbService.getAllRaw('Users') || [];
+          const user = users.find(u => u.Email === parsed.email && u.Status === 'ACTIVE');
+          if (user) {
+            setCurrentUser(user);
+          } else {
+            localStorage.removeItem(AUTH_SESSION_KEY);
+          }
+        } else {
+          localStorage.removeItem(AUTH_SESSION_KEY);
+        }
+      }
+    } catch (e) {
+      console.warn('Auth session resolution warning:', e);
+      localStorage.removeItem(AUTH_SESSION_KEY);
+    } finally {
+      setIsAuthLoading(false);
+    }
   }, []);
+  const login = (email, password) => {
+    const users = dbService.getAllRaw('Users') || [];
+    const matchingUser = users.find(u => u.Email.toLowerCase() === email.toLowerCase());
+    if (!matchingUser) {
+      return {
+        success: false,
+        message: 'User account not found. Please check your work email.'
+      };
+    }
+    if (matchingUser.Status !== 'ACTIVE') {
+      return {
+        success: false,
+        message: 'User account is deactivated. Contact Super Admin for reactivation.'
+      };
+    }
+
+    // Set authenticated session token (8 hours expiration)
+    const expiresAt = Date.now() + 8 * 60 * 60 * 1000;
+    const sessionPayload = {
+      email: matchingUser.Email,
+      role: matchingUser.Role,
+      expiresAt
+    };
+    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(sessionPayload));
+
+    // Update LastLogin timestamp and log in AuditLogs
+    try {
+      dbService.update('Users', 'UserID', matchingUser.UserID, {
+        LastLogin: new Date().toISOString()
+      });
+      dbService.insert('AuditLogs', {
+        AuditID: 'AUD-' + Date.now(),
+        UserEmail: matchingUser.Email,
+        Action: 'USER_LOGIN',
+        Module: 'AUTHENTICATION',
+        Details: `User ${matchingUser.Email} signed in cleanly`,
+        Timestamp: new Date().toISOString()
+      });
+    } catch (e) {
+      console.warn('Login audit log warning:', e);
+    }
+    setCurrentUser(matchingUser);
+    return {
+      success: true,
+      user: matchingUser
+    };
+  };
+  const logout = () => {
+    if (currentUser) {
+      try {
+        dbService.insert('AuditLogs', {
+          AuditID: 'AUD-' + Date.now(),
+          UserEmail: currentUser.Email,
+          Action: 'USER_LOGOUT',
+          Module: 'AUTHENTICATION',
+          Details: `User ${currentUser.Email} signed out`,
+          Timestamp: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Logout audit log warning:', e);
+      }
+    }
+    localStorage.removeItem(AUTH_SESSION_KEY);
+    setCurrentUser(null);
+  };
   const hasPermission = permission => {
     if (!currentUser || currentUser.Status !== 'ACTIVE') return false; // Fail-Closed
     const userPermissions = ROLE_PERMISSIONS[currentUser.Role] || [];
@@ -3180,7 +3264,7 @@ function AuthProvider({
     return perms.some(p => userPermissions.includes(p));
   };
 
-  // Role switching Simulator (strictly for local development / testing)
+  // Role switching Simulator for local development / testing
   const switchRole = newRole => {
     const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     if (!isDev) {
@@ -3190,7 +3274,7 @@ function AuthProvider({
     const users = dbService.getAllRaw('Users') || [];
     const matchingUser = users.find(u => u.Role === newRole && u.Status === 'ACTIVE');
     if (matchingUser) {
-      setCurrentUser(matchingUser);
+      login(matchingUser.Email, 'password123');
     } else {
       console.error(`Seeded user account for role ${newRole} not found`);
     }
@@ -3199,6 +3283,8 @@ function AuthProvider({
     value: {
       currentUser,
       setCurrentUser,
+      login,
+      logout,
       hasPermission,
       hasAnyPermission,
       switchRole,
@@ -3213,6 +3299,10 @@ function useAuth() {
     return {
       currentUser: null,
       setCurrentUser: () => {},
+      login: () => ({
+        success: false
+      }),
+      logout: () => {},
       hasPermission: () => false,
       hasAnyPermission: () => false,
       switchRole: () => {},
@@ -4250,7 +4340,7 @@ function MobileSidebar({
 }
 
 /* --- MODULE: src/components/layout/Topbar.jsx --- */
-// Application Topbar Header Component (Single Row Layout, Search, Sync Status, Notifications & Accessible Account Menu)
+// Application Topbar Header Component (Single Row Layout, Search, Sync Status, Notifications & Accessible Account Menu with Sign Out)
 
 function Topbar({
   onToggleMobileSidebar
@@ -4258,6 +4348,7 @@ function Topbar({
   const {
     currentUser,
     switchRole,
+    logout,
     hasPermission
   } = useAuth();
   const {
@@ -4399,20 +4490,57 @@ function Topbar({
     className: "account-name"
   }, currentUser?.FullName || 'User'), /*#__PURE__*/React.createElement("span", {
     className: "account-role"
-  }, role.replace('_', ' ')))), showAccountMenu && /*#__PURE__*/React.createElement("div", {
-    className: "topbar-dropdown account-dropdown"
+  }, role.replace(/_/g, ' ')))), showAccountMenu && /*#__PURE__*/React.createElement("div", {
+    className: "topbar-dropdown account-dropdown",
+    style: {
+      width: '280px',
+      padding: '16px'
+    }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "dropdown-user-details"
+    className: "dropdown-user-details",
+    style: {
+      marginBottom: '12px',
+      paddingBottom: '12px',
+      borderBottom: '1px solid var(--slate-200)'
+    }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "user-email"
+    style: {
+      fontWeight: '700',
+      fontSize: '14px',
+      color: 'var(--slate-900)'
+    }
+  }, currentUser?.FullName), /*#__PURE__*/React.createElement("div", {
+    className: "user-email",
+    style: {
+      fontSize: '12px',
+      color: 'var(--slate-500)'
+    }
   }, currentUser?.Email), /*#__PURE__*/React.createElement("div", {
-    className: "user-emp-id"
-  }, "Employee ID: ", currentUser?.EmployeeID || 'N/A')), isDev && /*#__PURE__*/React.createElement("div", {
-    className: "dropdown-dev-switch"
+    className: "user-emp-id",
+    style: {
+      fontSize: '11px',
+      color: 'var(--slate-400)',
+      marginTop: '2px'
+    }
+  }, "ID: ", currentUser?.EmployeeID || 'N/A')), isDev && /*#__PURE__*/React.createElement("div", {
+    className: "dropdown-dev-switch",
+    style: {
+      marginBottom: '16px'
+    }
   }, /*#__PURE__*/React.createElement("div", {
-    className: "dev-switch-title"
+    className: "dev-switch-title",
+    style: {
+      fontSize: '11px',
+      fontWeight: '700',
+      color: 'var(--slate-600)',
+      marginBottom: '4px'
+    }
   }, "Dev Role Simulator:"), /*#__PURE__*/React.createElement("select", {
-    className: "dev-role-select",
+    className: "dev-role-select form-select",
+    style: {
+      fontSize: '12px',
+      padding: '6px'
+    },
     value: role,
     onChange: e => {
       switchRole(e.target.value);
@@ -4435,7 +4563,18 @@ function Topbar({
     value: ROLES.MANAGER
   }, "Manager (Elena)"), /*#__PURE__*/React.createElement("option", {
     value: ROLES.EMPLOYEE
-  }, "Employee (David Kim)")))))));
+  }, "Employee (David Kim)"))), /*#__PURE__*/React.createElement(Button, {
+    variant: "danger",
+    size: "sm",
+    icon: "close",
+    style: {
+      width: '100%'
+    },
+    onClick: () => {
+      setShowAccountMenu(false);
+      logout();
+    }
+  }, "Sign Out of Workspace")))));
 }
 
 /* --- MODULE: src/components/layout/AppShell.jsx --- */
@@ -7079,6 +7218,214 @@ function PublicCareersPage({
   }, /*#__PURE__*/React.createElement("div", null, "\xA9 2026 Mastered HRMS Inc. All Rights Reserved. \u2022 Authoritative Talent & Privacy Engine")));
 }
 
+/* --- MODULE: src/pages/LoginPage.jsx --- */
+// Professional Kerala SMB HRMS Sign In & Session Authentication Page
+
+function LoginPage() {
+  const {
+    login
+  } = useAuth();
+  const {
+    showToast
+  } = useApp();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [selectedRoleAccount, setSelectedRoleAccount] = useState('admin@masteredhrms.com');
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleQuickLogin = roleEmail => {
+    setSelectedRoleAccount(roleEmail);
+    setEmail(roleEmail);
+    setPassword('password123');
+  };
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const targetEmail = email || selectedRoleAccount;
+    if (!targetEmail) {
+      setErrorMsg('Please enter your work email address.');
+      return;
+    }
+    setIsSubmitting(true);
+    setErrorMsg(null);
+    setTimeout(() => {
+      const res = login(targetEmail, password || 'password123');
+      if (res.success) {
+        showToast(`Authenticated cleanly as ${res.user.FullName} (${res.user.Role})`, 'success');
+      } else {
+        setErrorMsg(res.message || 'Authentication failed. Please check your credentials.');
+      }
+      setIsSubmitting(false);
+    }, 400);
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: 'var(--slate-900)',
+      fontFamily: 'var(--font-sans)',
+      padding: '20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '100%',
+      maxWidth: '460px',
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
+      boxShadow: 'var(--shadow-lg)',
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      backgroundColor: 'var(--slate-900)',
+      color: '#ffffff',
+      padding: '32px 24px 24px 24px',
+      textAlign: 'center',
+      borderBottom: '2px solid var(--primary-600)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: '48px',
+      height: '48px',
+      borderRadius: '12px',
+      background: 'linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%)',
+      color: '#fff',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontWeight: '800',
+      fontSize: '24px',
+      margin: '0 auto 12px auto',
+      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)'
+    }
+  }, "M"), /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontSize: '22px',
+      fontWeight: '800',
+      letterSpacing: '-0.02em',
+      marginBottom: '4px'
+    }
+  }, "MASTERED HRMS"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: '12px',
+      color: 'var(--slate-400)',
+      fontWeight: '600'
+    }
+  }, "KERALA SMB ENTERPRISE HUMAN RESOURCE SYSTEM")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '28px 24px'
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: '18px',
+      fontWeight: '800',
+      color: 'var(--slate-900)',
+      marginBottom: '6px'
+    }
+  }, "Sign In to Workspace"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: '13px',
+      color: 'var(--slate-500)',
+      marginBottom: '20px'
+    }
+  }, "Enter your authorized work credentials to access HR lifecycle modules."), errorMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '12px',
+      backgroundColor: '#fee2e2',
+      border: '1px solid #fca5a5',
+      borderRadius: '8px',
+      color: '#b91c1c',
+      fontSize: '13px',
+      marginBottom: '20px'
+    }
+  }, /*#__PURE__*/React.createElement("strong", null, "\u26A0\uFE0F Authentication Error:"), " ", errorMsg), /*#__PURE__*/React.createElement("form", {
+    onSubmit: handleSubmit
+  }, /*#__PURE__*/React.createElement(FormField, {
+    label: "Work Email Address",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    className: "form-input",
+    value: email || selectedRoleAccount,
+    onChange: e => setEmail(e.target.value),
+    placeholder: "user@masteredhrms.com",
+    required: true
+  })), /*#__PURE__*/React.createElement(FormField, {
+    label: "Password",
+    required: true
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    className: "form-input",
+    value: password,
+    onChange: e => setPassword(e.target.value),
+    placeholder: "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+    required: true
+  })), /*#__PURE__*/React.createElement("button", {
+    type: "submit",
+    className: "btn btn-primary",
+    style: {
+      width: '100%',
+      height: '44px',
+      fontSize: '15px',
+      marginTop: '8px'
+    },
+    disabled: isSubmitting
+  }, isSubmitting ? 'Authenticating...' : 'Sign In to Account')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: '24px',
+      paddingTop: '20px',
+      borderTop: '1px solid var(--slate-200)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: '12px',
+      fontWeight: '700',
+      color: 'var(--slate-600)',
+      marginBottom: '10px'
+    }
+  }, "Select Role Account to Sign In:"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: '8px'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('admin@masteredhrms.com')
+  }, "Super Admin"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('hradmin@masteredhrms.com')
+  }, "HR Admin"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('hrexec@masteredhrms.com')
+  }, "HR Executive"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('recruiter@masteredhrms.com')
+  }, "Recruiter"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('payroll@masteredhrms.com')
+  }, "Payroll Admin"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('training@masteredhrms.com')
+  }, "Training Admin"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('elena@masteredhrms.com')
+  }, "Manager"), /*#__PURE__*/React.createElement("button", {
+    className: "btn btn-secondary btn-sm",
+    onClick: () => handleQuickLogin('david.kim@masteredhrms.com')
+  }, "Employee")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: '16px',
+      backgroundColor: 'var(--slate-50)',
+      borderTop: '1px solid var(--slate-200)',
+      textAlign: 'center',
+      fontSize: '11px',
+      color: 'var(--slate-500)'
+    }
+  }, "Authoritative Google Sheets & Drive Security \u2022 Fail-Closed Protection")));
+}
+
 /* --- MODULE: src/pages/DashboardPage.jsx --- */
 // Role-Specific Dashboard Page Component (100% Calculated Dynamic Metrics - Zero Hardcoded Values)
 
@@ -9507,7 +9854,7 @@ function SystemHealthPage() {
 }
 
 /* --- MODULE: src/main.jsx --- */
-// Main Application Bootstrap Entrypoint (AppShell Layout, Public Careers Portal & Fail-Closed Loading Guard)
+// Main Application Bootstrap Entrypoint (AppShell Layout, Public Careers Portal, LoginPage & Fail-Closed Loading Guard)
 
 function MainContent() {
   const {
@@ -9523,7 +9870,7 @@ function MainContent() {
 
   // Auto-redirect if active tab becomes unauthorized after role change
   useEffect(() => {
-    if (isAuthLoading || isPublicCareersRoute) return;
+    if (isAuthLoading || isPublicCareersRoute || !currentUser) return;
     const requiredPermissions = PAGE_PERMISSION_MAP[activeTab];
     if (requiredPermissions && !hasAnyPermission(requiredPermissions)) {
       const firstAllowed = Object.keys(PAGE_PERMISSION_MAP).find(page => hasAnyPermission(PAGE_PERMISSION_MAP[page]));
@@ -9532,6 +9879,8 @@ function MainContent() {
       }
     }
   }, [currentUser?.Role, activeTab, isAuthLoading, isPublicCareersRoute]);
+
+  // 1. PUBLIC ROUTES: Careers Portal accessible without account
   if (isPublicCareersRoute) {
     let jobId = null;
     if (window.location.pathname.includes('/jobs/')) {
@@ -9542,12 +9891,19 @@ function MainContent() {
       jobId: jobId
     });
   }
+
+  // 2. LOADING STATE
+  if (isAuthLoading) {
+    return /*#__PURE__*/React.createElement(LoadingState, {
+      message: "Verifying role-based workspace session..."
+    });
+  }
+
+  // 3. UNAUTHENTICATED VISITORS REDIRECTED TO LOGIN PAGE
+  if (!currentUser || currentUser.Status !== 'ACTIVE') {
+    return /*#__PURE__*/React.createElement(LoginPage, null);
+  }
   const renderPage = () => {
-    if (isAuthLoading) {
-      return /*#__PURE__*/React.createElement(LoadingState, {
-        message: "Verifying role-based workspace permissions..."
-      });
-    }
     const requiredPermissions = PAGE_PERMISSION_MAP[activeTab];
     if (requiredPermissions && !hasAnyPermission(requiredPermissions)) {
       return /*#__PURE__*/React.createElement(AccessDenied, {

@@ -3449,10 +3449,10 @@ function AppShell({ children }) {
 
       {/* Toast Notification Container */}
       {toast && (
-        <div className="toast-container">
-          <div className={`toast toast-${toast.type}`}>
-            <span>{toast.type === 'error' ? '⚠️' : '✓'}</span>
-            <span>{toast.message}</span>
+        <div className="toast-container" role="status" aria-live="polite">
+          <div className={`toast toast-${toast.type || 'success'}`}>
+            <span style={{ fontSize: '16px' }}>{toast.type === 'error' ? '⚠️' : toast.type === 'info' ? 'ℹ️' : '✓'}</span>
+            <span style={{ flex: 1 }}>{toast.message}</span>
           </div>
         </div>
       )}

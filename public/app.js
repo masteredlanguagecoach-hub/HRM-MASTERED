@@ -1,4 +1,4 @@
-// Mastered HRMS Application Browser Bundle
+// HRMS Application Browser Bundle
 const React = window.React;
 const ReactDOM = window.ReactDOM;
 const {
@@ -3779,10 +3779,20 @@ function AppShell({
   }, /*#__PURE__*/React.createElement("div", {
     className: "content-container"
   }, children))), toast && /*#__PURE__*/React.createElement("div", {
-    className: "toast-container"
+    className: "toast-container",
+    role: "status",
+    "aria-live": "polite"
   }, /*#__PURE__*/React.createElement("div", {
-    className: `toast toast-${toast.type}`
-  }, /*#__PURE__*/React.createElement("span", null, toast.type === 'error' ? '⚠️' : '✓'), /*#__PURE__*/React.createElement("span", null, toast.message))));
+    className: `toast toast-${toast.type || 'success'}`
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: '16px'
+    }
+  }, toast.type === 'error' ? '⚠️' : toast.type === 'info' ? 'ℹ️' : '✓'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }, toast.message))));
 }
 
 /* --- MODULE: src/components/documents/EmailModal.jsx --- */

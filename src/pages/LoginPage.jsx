@@ -148,14 +148,8 @@ export function LoginPage() {
               Select Role Account to Sign In:
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('admin@masteredhrms.com')}>Super Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('hradmin@masteredhrms.com')}>HR Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('hrexec@masteredhrms.com')}>HR Executive</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('recruiter@masteredhrms.com')}>Recruiter</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('payroll@masteredhrms.com')}>Payroll Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('training@masteredhrms.com')}>Training Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('elena@masteredhrms.com')}>Manager</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('david.kim@masteredhrms.com')}>Employee</button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('admin@masteredhrms.com')}>Super Admin (Eleanor)</button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('david.kim@masteredhrms.com')}>Employee (David Kim)</button>
             </div>
           </div>
         </div>

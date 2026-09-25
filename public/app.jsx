@@ -429,6 +429,7 @@ function createInitialData() {
 class LocalDbDriver {
   constructor() {
     this.memoryData = null;
+    this.syncQueue = [];
     this.init();
   }
 
@@ -436,7 +437,6 @@ class LocalDbDriver {
     try {
       const storedVersion = typeof window !== 'undefined' ? localStorage.getItem(DB_VERSION_KEY) : null;
       if (storedVersion !== CURRENT_DB_VERSION) {
-        // Upgrade database to version 3.0 cleanly
         this.memoryData = createInitialData();
         this.saveAllToStorage();
         if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
@@ -466,6 +466,15 @@ class LocalDbDriver {
         if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
       } else {
         this.memoryData = loadedData;
+      }
+
+      const rawQueue = typeof window !== 'undefined' ? localStorage.getItem(SYNC_QUEUE_KEY) : null;
+      if (rawQueue) {
+        try {
+          this.syncQueue = JSON.parse(rawQueue);
+        } catch (e) {
+          this.syncQueue = [];
+        }
       }
     } catch (e) {
       console.warn('LocalDbDriver init fallback to fresh initial data:', e);
@@ -509,6 +518,27 @@ class LocalDbDriver {
     this.memoryData[sheetName] = this.memoryData[sheetName].filter(r => r[primaryKeyField] !== primaryKeyValue);
     this.saveAllToStorage();
     return this.memoryData[sheetName].length < initialLen;
+  }
+
+  hydrateFromRemote(remoteData) {
+    if (!remoteData || typeof remoteData !== 'object') return;
+    Object.keys(remoteData).forEach(sheetName => {
+      if (Array.isArray(remoteData[sheetName])) {
+        this.memoryData[sheetName] = remoteData[sheetName];
+      }
+    });
+    this.saveAllToStorage();
+  }
+
+  getSyncQueue() {
+    return Array.isArray(this.syncQueue) ? this.syncQueue : [];
+  }
+
+  saveSyncQueue(queue) {
+    this.syncQueue = queue;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+    }
   }
 }
 
@@ -3357,12 +3387,6 @@ function Topbar({ onToggleMobileSidebar }) {
                     aria-label="Select development role"
                   >
                     <option value={ROLES.SUPER_ADMIN}>Super Admin (Eleanor)</option>
-                    <option value={ROLES.HR_ADMIN}>HR Admin (Victoria)</option>
-                    <option value={ROLES.HR_EXECUTIVE}>HR Executive (Jordan)</option>
-                    <option value={ROLES.RECRUITER}>Recruiter (Marcus)</option>
-                    <option value={ROLES.PAYROLL_ADMIN}>Payroll Admin (Jessica)</option>
-                    <option value={ROLES.TRAINING_ADMIN}>Training Admin (Samantha)</option>
-                    <option value={ROLES.MANAGER}>Manager (Elena)</option>
                     <option value={ROLES.EMPLOYEE}>Employee (David Kim)</option>
                   </select>
                 </div>
@@ -5344,14 +5368,8 @@ function LoginPage() {
               Select Role Account to Sign In:
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('admin@masteredhrms.com')}>Super Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('hradmin@masteredhrms.com')}>HR Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('hrexec@masteredhrms.com')}>HR Executive</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('recruiter@masteredhrms.com')}>Recruiter</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('payroll@masteredhrms.com')}>Payroll Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('training@masteredhrms.com')}>Training Admin</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('elena@masteredhrms.com')}>Manager</button>
-              <button className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('david.kim@masteredhrms.com')}>Employee</button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('admin@masteredhrms.com')}>Super Admin (Eleanor)</button>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => handleQuickLogin('david.kim@masteredhrms.com')}>Employee (David Kim)</button>
             </div>
           </div>
         </div>
@@ -7978,20 +7996,15 @@ function App() {
   );
 }
 
-// Universal Mounting Routine
+// Universal Direct Mounting Routine for React 17 Standalone
 function initAndMount() {
   const container = document.getElementById('root');
   if (container) {
-    if (ReactDOM.createRoot) {
-      try {
-        const root = ReactDOM.createRoot(container);
-        root.render(React.createElement(App, null));
-        return;
-      } catch (e) {
-        console.warn('createRoot fallback to render:', e);
-      }
+    try {
+      ReactDOM.render(React.createElement(App, null), container);
+    } catch (e) {
+      console.error('ReactDOM.render error:', e);
     }
-    ReactDOM.render(React.createElement(App, null), container);
   }
 }
 

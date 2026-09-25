@@ -107,20 +107,15 @@ function App() {
   );
 }
 
-// Universal Mounting Routine
+// Universal Direct Mounting Routine for React 17 Standalone
 function initAndMount() {
   const container = document.getElementById('root');
   if (container) {
-    if (ReactDOM.createRoot) {
-      try {
-        const root = ReactDOM.createRoot(container);
-        root.render(React.createElement(App, null));
-        return;
-      } catch (e) {
-        console.warn('createRoot fallback to render:', e);
-      }
+    try {
+      ReactDOM.render(React.createElement(App, null), container);
+    } catch (e) {
+      console.error('ReactDOM.render error:', e);
     }
-    ReactDOM.render(React.createElement(App, null), container);
   }
 }
 

@@ -477,13 +477,13 @@ function createInitialData() {
 class LocalDbDriver {
   constructor() {
     this.memoryData = null;
+    this.syncQueue = [];
     this.init();
   }
   init() {
     try {
       const storedVersion = typeof window !== 'undefined' ? localStorage.getItem(DB_VERSION_KEY) : null;
       if (storedVersion !== CURRENT_DB_VERSION) {
-        // Upgrade database to version 3.0 cleanly
         this.memoryData = createInitialData();
         this.saveAllToStorage();
         if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
@@ -510,6 +510,14 @@ class LocalDbDriver {
         if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
       } else {
         this.memoryData = loadedData;
+      }
+      const rawQueue = typeof window !== 'undefined' ? localStorage.getItem(SYNC_QUEUE_KEY) : null;
+      if (rawQueue) {
+        try {
+          this.syncQueue = JSON.parse(rawQueue);
+        } catch (e) {
+          this.syncQueue = [];
+        }
       }
     } catch (e) {
       console.warn('LocalDbDriver init fallback to fresh initial data:', e);
@@ -551,6 +559,24 @@ class LocalDbDriver {
     this.memoryData[sheetName] = this.memoryData[sheetName].filter(r => r[primaryKeyField] !== primaryKeyValue);
     this.saveAllToStorage();
     return this.memoryData[sheetName].length < initialLen;
+  }
+  hydrateFromRemote(remoteData) {
+    if (!remoteData || typeof remoteData !== 'object') return;
+    Object.keys(remoteData).forEach(sheetName => {
+      if (Array.isArray(remoteData[sheetName])) {
+        this.memoryData[sheetName] = remoteData[sheetName];
+      }
+    });
+    this.saveAllToStorage();
+  }
+  getSyncQueue() {
+    return Array.isArray(this.syncQueue) ? this.syncQueue : [];
+  }
+  saveSyncQueue(queue) {
+    this.syncQueue = queue;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+    }
   }
 }
 const localDbDriver = new LocalDbDriver();
@@ -3714,18 +3740,6 @@ function Topbar({
   }, /*#__PURE__*/React.createElement("option", {
     value: ROLES.SUPER_ADMIN
   }, "Super Admin (Eleanor)"), /*#__PURE__*/React.createElement("option", {
-    value: ROLES.HR_ADMIN
-  }, "HR Admin (Victoria)"), /*#__PURE__*/React.createElement("option", {
-    value: ROLES.HR_EXECUTIVE
-  }, "HR Executive (Jordan)"), /*#__PURE__*/React.createElement("option", {
-    value: ROLES.RECRUITER
-  }, "Recruiter (Marcus)"), /*#__PURE__*/React.createElement("option", {
-    value: ROLES.PAYROLL_ADMIN
-  }, "Payroll Admin (Jessica)"), /*#__PURE__*/React.createElement("option", {
-    value: ROLES.TRAINING_ADMIN
-  }, "Training Admin (Samantha)"), /*#__PURE__*/React.createElement("option", {
-    value: ROLES.MANAGER
-  }, "Manager (Elena)"), /*#__PURE__*/React.createElement("option", {
     value: ROLES.EMPLOYEE
   }, "Employee (David Kim)"))), /*#__PURE__*/React.createElement(Button, {
     variant: "danger",
@@ -6555,30 +6569,14 @@ function LoginPage() {
       gap: '8px'
     }
   }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
     className: "btn btn-secondary btn-sm",
     onClick: () => handleQuickLogin('admin@masteredhrms.com')
-  }, "Super Admin"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary btn-sm",
-    onClick: () => handleQuickLogin('hradmin@masteredhrms.com')
-  }, "HR Admin"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary btn-sm",
-    onClick: () => handleQuickLogin('hrexec@masteredhrms.com')
-  }, "HR Executive"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary btn-sm",
-    onClick: () => handleQuickLogin('recruiter@masteredhrms.com')
-  }, "Recruiter"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary btn-sm",
-    onClick: () => handleQuickLogin('payroll@masteredhrms.com')
-  }, "Payroll Admin"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary btn-sm",
-    onClick: () => handleQuickLogin('training@masteredhrms.com')
-  }, "Training Admin"), /*#__PURE__*/React.createElement("button", {
-    className: "btn btn-secondary btn-sm",
-    onClick: () => handleQuickLogin('elena@masteredhrms.com')
-  }, "Manager"), /*#__PURE__*/React.createElement("button", {
+  }, "Super Admin (Eleanor)"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
     className: "btn btn-secondary btn-sm",
     onClick: () => handleQuickLogin('david.kim@masteredhrms.com')
-  }, "Employee")))), /*#__PURE__*/React.createElement("div", {
+  }, "Employee (David Kim)")))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '16px',
       backgroundColor: 'var(--slate-50)',
@@ -9846,20 +9844,15 @@ function App() {
   return /*#__PURE__*/React.createElement(AuthProvider, null, /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(MainContent, null)));
 }
 
-// Universal Mounting Routine
+// Universal Direct Mounting Routine for React 17 Standalone
 function initAndMount() {
   const container = document.getElementById('root');
   if (container) {
-    if (ReactDOM.createRoot) {
-      try {
-        const root = ReactDOM.createRoot(container);
-        root.render(React.createElement(App, null));
-        return;
-      } catch (e) {
-        console.warn('createRoot fallback to render:', e);
-      }
+    try {
+      ReactDOM.render(React.createElement(App, null), container);
+    } catch (e) {
+      console.error('ReactDOM.render error:', e);
     }
-    ReactDOM.render(React.createElement(App, null), container);
   }
 }
 if (typeof document !== 'undefined') {

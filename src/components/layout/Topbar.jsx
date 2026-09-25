@@ -156,12 +156,6 @@ export function Topbar({ onToggleMobileSidebar }) {
                     aria-label="Select development role"
                   >
                     <option value={ROLES.SUPER_ADMIN}>Super Admin (Eleanor)</option>
-                    <option value={ROLES.HR_ADMIN}>HR Admin (Victoria)</option>
-                    <option value={ROLES.HR_EXECUTIVE}>HR Executive (Jordan)</option>
-                    <option value={ROLES.RECRUITER}>Recruiter (Marcus)</option>
-                    <option value={ROLES.PAYROLL_ADMIN}>Payroll Admin (Jessica)</option>
-                    <option value={ROLES.TRAINING_ADMIN}>Training Admin (Samantha)</option>
-                    <option value={ROLES.MANAGER}>Manager (Elena)</option>
                     <option value={ROLES.EMPLOYEE}>Employee (David Kim)</option>
                   </select>
                 </div>

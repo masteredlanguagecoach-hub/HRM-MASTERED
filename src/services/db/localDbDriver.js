@@ -74,6 +74,7 @@ function createInitialData() {
 class LocalDbDriver {
   constructor() {
     this.memoryData = null;
+    this.syncQueue = [];
     this.init();
   }
 
@@ -81,7 +82,6 @@ class LocalDbDriver {
     try {
       const storedVersion = typeof window !== 'undefined' ? localStorage.getItem(DB_VERSION_KEY) : null;
       if (storedVersion !== CURRENT_DB_VERSION) {
-        // Upgrade database to version 3.0 cleanly
         this.memoryData = createInitialData();
         this.saveAllToStorage();
         if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
@@ -111,6 +111,15 @@ class LocalDbDriver {
         if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
       } else {
         this.memoryData = loadedData;
+      }
+
+      const rawQueue = typeof window !== 'undefined' ? localStorage.getItem(SYNC_QUEUE_KEY) : null;
+      if (rawQueue) {
+        try {
+          this.syncQueue = JSON.parse(rawQueue);
+        } catch (e) {
+          this.syncQueue = [];
+        }
       }
     } catch (e) {
       console.warn('LocalDbDriver init fallback to fresh initial data:', e);
@@ -154,6 +163,27 @@ class LocalDbDriver {
     this.memoryData[sheetName] = this.memoryData[sheetName].filter(r => r[primaryKeyField] !== primaryKeyValue);
     this.saveAllToStorage();
     return this.memoryData[sheetName].length < initialLen;
+  }
+
+  hydrateFromRemote(remoteData) {
+    if (!remoteData || typeof remoteData !== 'object') return;
+    Object.keys(remoteData).forEach(sheetName => {
+      if (Array.isArray(remoteData[sheetName])) {
+        this.memoryData[sheetName] = remoteData[sheetName];
+      }
+    });
+    this.saveAllToStorage();
+  }
+
+  getSyncQueue() {
+    return Array.isArray(this.syncQueue) ? this.syncQueue : [];
+  }
+
+  saveSyncQueue(queue) {
+    this.syncQueue = queue;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(queue));
+    }
   }
 }
 

@@ -1,16 +1,17 @@
-// Application Topbar Header Component (Single Row Layout, Search, Sync Status, Notifications & Accessible Account Menu with Sign Out)
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useApp } from '../../context/AppContext.jsx';
 import { SVGIcon, Button } from '../common/UIComponents.jsx';
 import { ROLES } from '../../config/constants.js';
+import { InstallAppModal } from '../setup/InstallAppModal.jsx';
 
 export function Topbar({ onToggleMobileSidebar }) {
   const { currentUser, switchRole, logout, hasPermission } = useAuth();
   const { activeTab, setActiveTab, searchQuery, setSearchQuery, syncStatus, notifications } = useApp();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
+
 
   const role = currentUser?.Role || ROLES.EMPLOYEE;
   const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
@@ -86,6 +87,19 @@ export function Topbar({ onToggleMobileSidebar }) {
         <div className="topbar-action-wrapper">
           {renderQuickAction()}
         </div>
+
+        {/* Install App / APK Download Button */}
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: '600' }}
+          onClick={() => setShowInstallModal(true)}
+          title="Download & Install App (Android APK, iOS, PC, Mac)"
+          aria-label="Install App"
+        >
+          <SVGIcon name="download" size={14} color="var(--primary-600)" />
+          <span>Install App</span>
+        </button>
 
         {/* Notifications Icon Button */}
         <div className="topbar-popover-wrapper">
@@ -177,6 +191,12 @@ export function Topbar({ onToggleMobileSidebar }) {
           )}
         </div>
       </div>
+
+      {/* Download & Install App Modal */}
+      <InstallAppModal
+        isOpen={showInstallModal}
+        onClose={() => setShowInstallModal(false)}
+      />
     </header>
   );
 }

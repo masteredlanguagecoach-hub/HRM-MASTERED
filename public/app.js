@@ -2698,6 +2698,15 @@ function SVGIcon({
     }),
     filter: /*#__PURE__*/React.createElement("path", {
       d: "M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"
+    }),
+    download: /*#__PURE__*/React.createElement("path", {
+      d: "M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
+    }),
+    smartphone: /*#__PURE__*/React.createElement("path", {
+      d: "M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"
+    }),
+    laptop: /*#__PURE__*/React.createElement("path", {
+      d: "M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"
     })
   };
   const svgPath = icons[name] || icons.dashboard;
@@ -3530,7 +3539,6 @@ function MobileSidebar({
 }
 
 /* --- MODULE: src/components/layout/Topbar.jsx --- */
-// Application Topbar Header Component (Single Row Layout, Search, Sync Status, Notifications & Accessible Account Menu with Sign Out)
 
 function Topbar({
   onToggleMobileSidebar
@@ -3551,6 +3559,7 @@ function Topbar({
   } = useApp();
   const [showAccountMenu, setShowAccountMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
   const role = currentUser?.Role || ROLES.EMPLOYEE;
   const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
@@ -3635,7 +3644,25 @@ function Topbar({
     className: "sync-text"
   }, syncStatus.isOnline ? 'Sheets DB Live' : 'Cache Mode')), /*#__PURE__*/React.createElement("div", {
     className: "topbar-action-wrapper"
-  }, renderQuickAction()), /*#__PURE__*/React.createElement("div", {
+  }, renderQuickAction()), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "btn btn-secondary btn-sm",
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      padding: '6px 12px',
+      fontSize: '12px',
+      fontWeight: '600'
+    },
+    onClick: () => setShowInstallModal(true),
+    title: "Download & Install App (Android APK, iOS, PC, Mac)",
+    "aria-label": "Install App"
+  }, /*#__PURE__*/React.createElement(SVGIcon, {
+    name: "download",
+    size: 14,
+    color: "var(--primary-600)"
+  }), /*#__PURE__*/React.createElement("span", null, "Install App")), /*#__PURE__*/React.createElement("div", {
     className: "topbar-popover-wrapper"
   }, /*#__PURE__*/React.createElement("button", {
     className: "topbar-icon-btn",
@@ -3752,7 +3779,10 @@ function Topbar({
       setShowAccountMenu(false);
       logout();
     }
-  }, "Sign Out of Workspace")))));
+  }, "Sign Out of Workspace")))), /*#__PURE__*/React.createElement(InstallAppModal, {
+    isOpen: showInstallModal,
+    onClose: () => setShowInstallModal(false)
+  }));
 }
 
 /* --- MODULE: src/components/layout/AppShell.jsx --- */

@@ -2,8 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Mastered HRMS - AI-Powered Human Resource Management System</title>
+
+  <!-- PWA & Mobile Web App Meta Tags -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Mastered HRMS" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="/icons/icon-192.png" />
 
   <!-- Local Standalone Vendor Libraries -->
   <script src="./vendor/react.production.min.js"></script>
@@ -17,5 +26,16 @@
 
   <!-- Pre-transpiled High-Performance Pure JavaScript Application -->
   <script src="./app.js"></script>
+
+  <!-- Service Worker Registration for PWA / Offline & Desktop/Mobile Installation -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then((reg) => console.log('✓ Mastered HRMS PWA Service Worker registered:', reg.scope))
+          .catch((err) => console.log('Service Worker registration note:', err));
+      });
+    }
+  </script>
 </body>
 </html>

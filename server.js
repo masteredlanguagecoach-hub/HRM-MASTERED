@@ -58,6 +58,7 @@ function ensureCompiledBundle() {
       'src/components/layout/AppShell.jsx',
       'src/components/documents/EmailModal.jsx',
       'src/components/documents/TemplateManagerModal.jsx',
+      'src/components/setup/InstallAppModal.jsx',
       'src/components/setup/SetupWizardModal.jsx',
       'src/components/recruitment/CreateJobModal.jsx',
       'src/components/onboarding/OnboardingWorkflowModal.jsx',

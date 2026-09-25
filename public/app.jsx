@@ -8025,13 +8025,87 @@ function MainContent() {
   );
 }
 
+class RootErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Mastered HRMS Application caught error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#0f172a',
+          color: '#ffffff',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          padding: '24px',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '16px',
+            background: '#2563eb',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            fontWeight: 'bold',
+            marginBottom: '20px'
+          }}>
+            M
+          </div>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', marginBottom: '8px' }}>Mastered HRMS Platform</h1>
+          <p style={{ color: '#94a3b8', fontSize: '14px', maxWidth: '440px', marginBottom: '24px' }}>
+            {this.state.error?.message || 'The application encountered a display refresh requirement.'}
+          </p>
+          <button
+            onClick={() => {
+              this.setState({ hasError: false, error: null });
+              window.location.reload();
+            }}
+            style={{
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              padding: '10px 24px',
+              borderRadius: '8px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+          >
+            Reload Application Workspace
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   return (
-    <AuthProvider>
-      <AppProvider>
-        <MainContent />
-      </AppProvider>
-    </AuthProvider>
+    <RootErrorBoundary>
+      <AuthProvider>
+        <AppProvider>
+          <MainContent />
+        </AppProvider>
+      </AuthProvider>
+    </RootErrorBoundary>
   );
 }
 

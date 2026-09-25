@@ -9887,8 +9887,89 @@ function MainContent() {
   };
   return /*#__PURE__*/React.createElement(AppShell, null, renderPage());
 }
+class RootErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      error: null
+    };
+  }
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+      error
+    };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Mastered HRMS Application caught error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return /*#__PURE__*/React.createElement("div", {
+        style: {
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#0f172a',
+          color: '#ffffff',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          padding: '24px',
+          textAlign: 'center'
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          width: '64px',
+          height: '64px',
+          borderRadius: '16px',
+          background: '#2563eb',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '28px',
+          fontWeight: 'bold',
+          marginBottom: '20px'
+        }
+      }, "M"), /*#__PURE__*/React.createElement("h1", {
+        style: {
+          fontSize: '24px',
+          fontWeight: '800',
+          marginBottom: '8px'
+        }
+      }, "Mastered HRMS Platform"), /*#__PURE__*/React.createElement("p", {
+        style: {
+          color: '#94a3b8',
+          fontSize: '14px',
+          maxWidth: '440px',
+          marginBottom: '24px'
+        }
+      }, this.state.error?.message || 'The application encountered a display refresh requirement.'), /*#__PURE__*/React.createElement("button", {
+        onClick: () => {
+          this.setState({
+            hasError: false,
+            error: null
+          });
+          window.location.reload();
+        },
+        style: {
+          backgroundColor: '#2563eb',
+          color: '#ffffff',
+          border: 'none',
+          padding: '10px 24px',
+          borderRadius: '8px',
+          fontWeight: '700',
+          cursor: 'pointer',
+          fontSize: '14px'
+        }
+      }, "Reload Application Workspace"));
+    }
+    return this.props.children;
+  }
+}
 function App() {
-  return /*#__PURE__*/React.createElement(AuthProvider, null, /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(MainContent, null)));
+  return /*#__PURE__*/React.createElement(RootErrorBoundary, null, /*#__PURE__*/React.createElement(AuthProvider, null, /*#__PURE__*/React.createElement(AppProvider, null, /*#__PURE__*/React.createElement(MainContent, null))));
 }
 
 // Universal Direct Mounting Routine for React 17 Standalone

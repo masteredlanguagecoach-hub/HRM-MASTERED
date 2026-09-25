@@ -49,6 +49,7 @@ export function InstallAppModal({ isOpen, onClose }) {
 
   return (
     <Modal
+      isOpen={true}
       title="Download & Install Mastered HRMS"
       subtitle="Install Mastered HRMS as an App / APK on Android, iOS, Windows PC, Mac & Linux"
       onClose={onClose}

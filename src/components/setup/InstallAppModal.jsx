@@ -9,8 +9,16 @@ export function InstallAppModal({ isOpen, onClose }) {
 
   useEffect(() => {
     // Check if app is already running in standalone mode (installed)
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      setIsStandalone(true);
+    try {
+      if (typeof window !== 'undefined') {
+        const isMql = window.matchMedia && window.matchMedia('(display-mode: standalone)')?.matches;
+        const isNavStandalone = window.navigator && window.navigator.standalone === true;
+        if (isMql || isNavStandalone) {
+          setIsStandalone(true);
+        }
+      }
+    } catch (e) {
+      console.warn('Standalone detection note:', e);
     }
 
     // Capture browser install prompt if available
@@ -18,8 +26,10 @@ export function InstallAppModal({ isOpen, onClose }) {
       e.preventDefault();
       setDeferredPrompt(e);
     };
-    window.addEventListener('beforeinstallprompt', handler);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('beforeinstallprompt', handler);
+      return () => window.removeEventListener('beforeinstallprompt', handler);
+    }
   }, []);
 
   const handleNativeInstall = async () => {

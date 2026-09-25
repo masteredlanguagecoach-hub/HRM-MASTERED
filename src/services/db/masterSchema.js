@@ -1,4 +1,4 @@
-// Master Google Sheets Schema Definitions (38 Master Sheets + JobEnquiries & EmployeeLegalContracts)
+// Master Google Sheets Schema Definitions (38 Master Sheets + JobEnquiries, EmployeeLegalContracts & HRSOPs)
 
 export const MASTER_SHEETS = {
   Settings: [
@@ -76,6 +76,10 @@ export const MASTER_SHEETS = {
     'ContractID', 'EmployeeID', 'ContractType', 'TaxID_SSN', 'WorkPermitStatus',
     'WorkPermitExpiry', 'DocumentDriveFileID', 'DocumentFileName', 'EffectiveDate',
     'ExpiryDate', 'SignedStatus', 'SignedAt', 'WitnessedBy', 'Notes', 'CreatedAt', 'UpdatedAt'
+  ],
+  HRSOPs: [
+    'SOPID', 'SOPTitle', 'Category', 'Version', 'EffectiveDate', 'Summary', 'ContentText',
+    'ApprovedBy', 'DriveFileID', 'Status', 'CreatedAt'
   ],
   CandidateDocuments: [
     'DocumentID', 'CandidateID', 'EnquiryID', 'DocumentType', 'FileName', 'DriveFileID',

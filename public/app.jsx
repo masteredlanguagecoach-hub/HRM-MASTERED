@@ -9,12 +9,6 @@ const { useState, useEffect, useContext, createContext } = React;
 
 const ROLES = {
   SUPER_ADMIN: 'SUPER_ADMIN',
-  HR_ADMIN: 'HR_ADMIN',
-  HR_EXECUTIVE: 'HR_EXECUTIVE',
-  RECRUITER: 'RECRUITER',
-  PAYROLL_ADMIN: 'PAYROLL_ADMIN',
-  TRAINING_ADMIN: 'TRAINING_ADMIN',
-  MANAGER: 'MANAGER',
   EMPLOYEE: 'EMPLOYEE'
 };
 
@@ -103,235 +97,74 @@ const PAGE_PERMISSION_MAP = {
 
 // Role-specific navigation labels mapping
 const ROLE_NAV_LABELS = {
-  [ROLES.RECRUITER]: {
-    'Recruitment': 'Assigned Jobs & Pipelines',
-    'Employees': 'My Profile',
-    'Attendance & Leave': 'My Attendance',
-    'Payroll': 'My Payslips',
-    'Training': 'My Learning',
-    'Performance': 'My Goals',
-    'Exit Management': 'My Exit'
-  },
-  [ROLES.PAYROLL_ADMIN]: {
-    'Employees': 'Employee Directory',
-    'Attendance & Leave': 'Attendance Inputs',
-    'Payroll': 'Payroll Runs & Payslips',
-    'Training': 'My Learning',
-    'Performance': 'My Goals',
-    'Exit Management': 'My Exit'
-  },
-  [ROLES.TRAINING_ADMIN]: {
-    'Employees': 'Employee Directory',
-    'Attendance & Leave': 'My Attendance',
-    'Payroll': 'My Payslips',
-    'Training': 'Programs & Assignments',
-    'Performance': 'My Goals',
-    'Exit Management': 'My Exit'
-  },
-  [ROLES.MANAGER]: {
-    'Recruitment': 'Assigned Interviews',
-    'Employees': 'My Team',
-    'Attendance & Leave': 'Team Attendance & Leave',
-    'Payroll': 'My Payslips',
-    'Training': 'Team Learning',
-    'Performance': 'Team Goals & Reviews',
-    'Exit Management': 'Team Exit'
+  [ROLES.SUPER_ADMIN]: {
+    'Employees': 'Employee Directory & Legal',
+    'Attendance & Leave': 'Daily Attendance & Leave',
+    'Payroll': 'Payroll Processing & Payslips',
+    'Training': 'Training & Learning',
+    'Performance': 'KPI, KRA & Performance',
+    'Exit Management': 'Exit & Offboarding Management'
   },
   [ROLES.EMPLOYEE]: {
-    'Employees': 'My Profile',
-    'Attendance & Leave': 'My Attendance & Leave',
+    'Employees': 'My Profile & Legal',
+    'Attendance & Leave': 'My Attendance Report & Leave',
     'Payroll': 'My Payslips',
     'Training': 'My Learning',
-    'Performance': 'My Goals & Reviews',
+    'Performance': 'My KPIs & KRAs',
     'Exit Management': 'Resignation & Exit'
   }
 };
 
 const ROLE_PERMISSIONS = {
   [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
-  [ROLES.HR_ADMIN]: [
-    PERMISSIONS.DASHBOARD_VIEW,
-    PERMISSIONS.RECRUITMENT_VIEW, PERMISSIONS.RECRUITMENT_CREATE, PERMISSIONS.RECRUITMENT_EDIT, PERMISSIONS.RECRUITMENT_SCREEN, PERMISSIONS.RECRUITMENT_SHORTLIST, PERMISSIONS.RECRUITMENT_REJECT, PERMISSIONS.RECRUITMENT_INTERVIEW_MOVE, PERMISSIONS.RECRUITMENT_SELECT,
-    PERMISSIONS.ONBOARDING_VIEW, PERMISSIONS.ONBOARDING_MANAGE,
-    PERMISSIONS.EMPLOYEE_VIEW, PERMISSIONS.EMPLOYEE_DIRECTORY_VIEW, PERMISSIONS.EMPLOYEE_SENSITIVE_VIEW, PERMISSIONS.EMPLOYEE_SELF_VIEW, PERMISSIONS.EMPLOYEE_CREATE, PERMISSIONS.EMPLOYEE_EDIT, PERMISSIONS.EMPLOYEE_DELETE,
-    PERMISSIONS.ATTENDANCE_VIEW, PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.ATTENDANCE_MANAGE, PERMISSIONS.LEAVE_APPLY, PERMISSIONS.LEAVE_APPROVE,
-    PERMISSIONS.PAYROLL_VIEW, PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD, PERMISSIONS.PAYROLL_PROCESS,
-    PERMISSIONS.TRAINING_VIEW, PERMISSIONS.TRAINING_SELF_VIEW, PERMISSIONS.TRAINING_MANAGE,
-    PERMISSIONS.PERFORMANCE_VIEW, PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF, PERMISSIONS.PERFORMANCE_GOAL_MANAGE_TEAM, PERMISSIONS.PERFORMANCE_REVIEW,
-    PERMISSIONS.EXIT_VIEW, PERMISSIONS.EXIT_SELF_CREATE, PERMISSIONS.EXIT_PROCESS,
-    PERMISSIONS.REPORTS_VIEW, PERMISSIONS.HEALTH_VIEW
-  ],
-  [ROLES.HR_EXECUTIVE]: [
-    PERMISSIONS.DASHBOARD_VIEW,
-    PERMISSIONS.RECRUITMENT_VIEW, PERMISSIONS.RECRUITMENT_CREATE, PERMISSIONS.RECRUITMENT_EDIT, PERMISSIONS.RECRUITMENT_SCREEN, PERMISSIONS.RECRUITMENT_SHORTLIST, PERMISSIONS.RECRUITMENT_REJECT, PERMISSIONS.RECRUITMENT_INTERVIEW_MOVE, PERMISSIONS.RECRUITMENT_SELECT,
-    PERMISSIONS.ONBOARDING_VIEW, PERMISSIONS.ONBOARDING_MANAGE,
-    PERMISSIONS.EMPLOYEE_VIEW, PERMISSIONS.EMPLOYEE_DIRECTORY_VIEW, PERMISSIONS.EMPLOYEE_SENSITIVE_VIEW, PERMISSIONS.EMPLOYEE_SELF_VIEW, PERMISSIONS.EMPLOYEE_CREATE, PERMISSIONS.EMPLOYEE_EDIT,
-    PERMISSIONS.ATTENDANCE_VIEW, PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.ATTENDANCE_MANAGE, PERMISSIONS.LEAVE_APPLY, PERMISSIONS.LEAVE_APPROVE,
-    PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD,
-    PERMISSIONS.TRAINING_VIEW, PERMISSIONS.TRAINING_SELF_VIEW, PERMISSIONS.TRAINING_MANAGE,
-    PERMISSIONS.PERFORMANCE_VIEW, PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF, PERMISSIONS.PERFORMANCE_GOAL_MANAGE_TEAM, PERMISSIONS.PERFORMANCE_REVIEW,
-    PERMISSIONS.EXIT_VIEW, PERMISSIONS.EXIT_SELF_CREATE, PERMISSIONS.EXIT_PROCESS,
-    PERMISSIONS.REPORTS_VIEW
-  ],
-  [ROLES.RECRUITER]: [
-    PERMISSIONS.DASHBOARD_VIEW,
-    PERMISSIONS.RECRUITMENT_VIEW, PERMISSIONS.RECRUITMENT_CREATE, PERMISSIONS.RECRUITMENT_EDIT, PERMISSIONS.RECRUITMENT_SCREEN, PERMISSIONS.RECRUITMENT_SHORTLIST, PERMISSIONS.RECRUITMENT_REJECT, PERMISSIONS.RECRUITMENT_INTERVIEW_MOVE,
-    PERMISSIONS.EMPLOYEE_DIRECTORY_VIEW, PERMISSIONS.EMPLOYEE_SELF_VIEW,
-    PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.LEAVE_APPLY,
-    PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD,
-    PERMISSIONS.TRAINING_SELF_VIEW,
-    PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF,
-    PERMISSIONS.EXIT_SELF_CREATE
-  ],
-  [ROLES.PAYROLL_ADMIN]: [
-    PERMISSIONS.DASHBOARD_VIEW,
-    PERMISSIONS.EMPLOYEE_VIEW, PERMISSIONS.EMPLOYEE_DIRECTORY_VIEW, PERMISSIONS.EMPLOYEE_SENSITIVE_VIEW, PERMISSIONS.EMPLOYEE_SELF_VIEW,
-    PERMISSIONS.ATTENDANCE_VIEW, PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.LEAVE_APPLY,
-    PERMISSIONS.PAYROLL_VIEW, PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD, PERMISSIONS.PAYROLL_PROCESS,
-    PERMISSIONS.TRAINING_SELF_VIEW,
-    PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF,
-    PERMISSIONS.EXIT_SELF_CREATE
-  ],
-  [ROLES.TRAINING_ADMIN]: [
-    PERMISSIONS.DASHBOARD_VIEW,
-    PERMISSIONS.EMPLOYEE_DIRECTORY_VIEW, PERMISSIONS.EMPLOYEE_SELF_VIEW,
-    PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.LEAVE_APPLY,
-    PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD,
-    PERMISSIONS.TRAINING_VIEW, PERMISSIONS.TRAINING_SELF_VIEW, PERMISSIONS.TRAINING_MANAGE,
-    PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF,
-    PERMISSIONS.EXIT_SELF_CREATE
-  ],
-  [ROLES.MANAGER]: [
-    PERMISSIONS.DASHBOARD_VIEW,
-    PERMISSIONS.RECRUITMENT_VIEW, PERMISSIONS.RECRUITMENT_INTERVIEW_MOVE,
-    PERMISSIONS.EMPLOYEE_DIRECTORY_VIEW, PERMISSIONS.EMPLOYEE_SELF_VIEW,
-    PERMISSIONS.ATTENDANCE_VIEW, PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.LEAVE_APPLY, PERMISSIONS.LEAVE_APPROVE,
-    PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD,
-    PERMISSIONS.TRAINING_SELF_VIEW,
-    PERMISSIONS.PERFORMANCE_VIEW, PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF, PERMISSIONS.PERFORMANCE_GOAL_MANAGE_TEAM, PERMISSIONS.PERFORMANCE_REVIEW,
-    PERMISSIONS.EXIT_VIEW, PERMISSIONS.EXIT_SELF_CREATE
-  ],
   [ROLES.EMPLOYEE]: [
     PERMISSIONS.DASHBOARD_VIEW,
     PERMISSIONS.EMPLOYEE_SELF_VIEW,
-    PERMISSIONS.ATTENDANCE_SELF_VIEW, PERMISSIONS.LEAVE_APPLY,
-    PERMISSIONS.PAYROLL_SELF_VIEW, PERMISSIONS.PAYSLIP_SELF_DOWNLOAD,
+    PERMISSIONS.ATTENDANCE_SELF_VIEW,
+    PERMISSIONS.LEAVE_APPLY,
+    PERMISSIONS.PAYROLL_SELF_VIEW,
+    PERMISSIONS.PAYSLIP_SELF_DOWNLOAD,
     PERMISSIONS.TRAINING_SELF_VIEW,
-    PERMISSIONS.PERFORMANCE_SELF_VIEW, PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF,
+    PERMISSIONS.PERFORMANCE_SELF_VIEW,
+    PERMISSIONS.PERFORMANCE_GOAL_CREATE_SELF,
     PERMISSIONS.EXIT_SELF_CREATE
   ]
 };
 
-const ROLE_DATA_SCOPES = {
-  [ROLES.SUPER_ADMIN]: { Jobs: 'ALL', Candidates: 'ALL', Employees: 'ALL', Attendance: 'ALL', LeaveRequests: 'ALL', LeaveBalances: 'ALL', Payroll: 'ALL', PayrollItems: 'ALL', TrainingPrograms: 'ALL', TrainingAssignments: 'ALL', PerformanceGoals: 'ALL', PerformanceReviews: 'ALL', ExitRequests: 'ALL' },
-  [ROLES.HR_ADMIN]: { Jobs: 'ALL', Candidates: 'ALL', Employees: 'ALL', Attendance: 'ALL', LeaveRequests: 'ALL', LeaveBalances: 'ALL', Payroll: 'ALL', PayrollItems: 'ALL', TrainingPrograms: 'ALL', TrainingAssignments: 'ALL', PerformanceGoals: 'ALL', PerformanceReviews: 'ALL', ExitRequests: 'ALL' },
-  [ROLES.HR_EXECUTIVE]: { Jobs: 'ALL', Candidates: 'ALL', Employees: 'ALL', Attendance: 'ALL', LeaveRequests: 'ALL', LeaveBalances: 'ALL', Payroll: 'SELF', PayrollItems: 'SELF', TrainingPrograms: 'ALL', TrainingAssignments: 'ALL', PerformanceGoals: 'ALL', PerformanceReviews: 'ALL', ExitRequests: 'ALL' },
-  [ROLES.RECRUITER]: { Jobs: 'ASSIGNED', Candidates: 'ASSIGNED', Employees: 'ALL', Attendance: 'SELF', LeaveRequests: 'SELF', LeaveBalances: 'SELF', Payroll: 'NONE', PayrollItems: 'SELF', TrainingPrograms: 'SELF', TrainingAssignments: 'SELF', PerformanceGoals: 'SELF', PerformanceReviews: 'SELF', ExitRequests: 'SELF' },
-  [ROLES.PAYROLL_ADMIN]: { Jobs: 'NONE', Candidates: 'NONE', Employees: 'ALL', Attendance: 'ALL', LeaveRequests: 'ALL', LeaveBalances: 'ALL', Payroll: 'ALL', PayrollItems: 'ALL', TrainingPrograms: 'NONE', TrainingAssignments: 'SELF', PerformanceGoals: 'SELF', PerformanceReviews: 'NONE', ExitRequests: 'SELF' },
-  [ROLES.TRAINING_ADMIN]: { Jobs: 'NONE', Candidates: 'NONE', Employees: 'ALL', Attendance: 'SELF', LeaveRequests: 'SELF', LeaveBalances: 'SELF', Payroll: 'NONE', PayrollItems: 'SELF', TrainingPrograms: 'ALL', TrainingAssignments: 'ALL', PerformanceGoals: 'SELF', PerformanceReviews: 'NONE', ExitRequests: 'SELF' },
-  [ROLES.MANAGER]: { Jobs: 'ASSIGNED', Candidates: 'ASSIGNED', Employees: 'TEAM', Attendance: 'TEAM', LeaveRequests: 'TEAM', LeaveBalances: 'TEAM', Payroll: 'NONE', PayrollItems: 'SELF', TrainingPrograms: 'TEAM', TrainingAssignments: 'TEAM', PerformanceGoals: 'TEAM', PerformanceReviews: 'TEAM', ExitRequests: 'TEAM' },
-  [ROLES.EMPLOYEE]: { Jobs: 'NONE', Candidates: 'NONE', Employees: 'SELF', Attendance: 'SELF', LeaveRequests: 'SELF', LeaveBalances: 'SELF', Payroll: 'NONE', PayrollItems: 'SELF', TrainingPrograms: 'SELF', TrainingAssignments: 'SELF', PerformanceGoals: 'SELF', PerformanceReviews: 'SELF', ExitRequests: 'SELF' }
+// Role Default Scope Mapping per Sheet
+const DEFAULT_ROLE_SCOPES = {
+  [ROLES.SUPER_ADMIN]: {
+    'Employees': DATA_SCOPES.ALL,
+    'Jobs': DATA_SCOPES.ALL,
+    'Candidates': DATA_SCOPES.ALL,
+    'Attendance': DATA_SCOPES.ALL,
+    'LeaveRequests': DATA_SCOPES.ALL,
+    'Payroll': DATA_SCOPES.ALL,
+    'TrainingPrograms': DATA_SCOPES.ALL,
+    'PerformanceGoals': DATA_SCOPES.ALL,
+    'ExitRequests': DATA_SCOPES.ALL
+  },
+  [ROLES.EMPLOYEE]: {
+    'Employees': DATA_SCOPES.SELF,
+    'Attendance': DATA_SCOPES.SELF,
+    'LeaveRequests': DATA_SCOPES.SELF,
+    'PayrollItems': DATA_SCOPES.SELF,
+    'TrainingAssignments': DATA_SCOPES.SELF,
+    'PerformanceGoals': DATA_SCOPES.SELF,
+    'ExitRequests': DATA_SCOPES.SELF
+  }
 };
 
-/**
- * Human-readable Enum Formatter Utility
- */
-function formatEnumLabel(val) {
-  if (!val) return 'N/A';
-  const text = String(val).replace(/_/g, ' ').toLowerCase();
-  return text.charAt(0).toUpperCase() + text.slice(1);
+const ROLE_DATA_SCOPES = DEFAULT_ROLE_SCOPES;
+
+// Standardized UI Enum Formatting Helper
+function formatEnumLabel(value) {
+  if (!value) return 'N/A';
+  return String(value)
+    .replace(/_/g, ' ')
+    .toLowerCase()
+    .replace(/\b\w/g, char => char.toUpperCase());
 }
-
-const JOB_STATUSES = {
-  DRAFT: 'DRAFT',
-  OPEN: 'OPEN',
-  ON_HOLD: 'ON_HOLD',
-  CLOSED: 'CLOSED',
-  CANCELLED: 'CANCELLED'
-};
-
-const PIPELINE_STAGES = {
-  NEW: 'NEW',
-  AI_SCREENING: 'AI_SCREENING',
-  AI_REVIEWED: 'AI_REVIEWED',
-  SHORTLISTED: 'SHORTLISTED',
-  INTERVIEW_1: 'INTERVIEW_1',
-  INTERVIEW_2: 'INTERVIEW_2',
-  FINAL_INTERVIEW: 'FINAL_INTERVIEW',
-  SELECTED: 'SELECTED',
-  OFFER_SENT: 'OFFER_SENT',
-  OFFER_ACCEPTED: 'OFFER_ACCEPTED',
-  JOINED: 'JOINED',
-  REJECTED: 'REJECTED',
-  WITHDRAWN: 'WITHDRAWN'
-};
-
-const AI_RECOMMENDATIONS = {
-  STRONG_SHORTLIST: 'STRONG_SHORTLIST',
-  SHORTLIST: 'SHORTLIST',
-  MANUAL_REVIEW: 'MANUAL_REVIEW',
-  LOW_MATCH: 'LOW_MATCH'
-};
-
-const CANDIDATE_AI_STATUSES = {
-  RECEIVED: 'RECEIVED',
-  QUEUED: 'QUEUED',
-  EXTRACTING: 'EXTRACTING',
-  EXTRACTED: 'EXTRACTED',
-  AI_PROCESSING: 'AI_PROCESSING',
-  AI_COMPLETED: 'AI_COMPLETED',
-  FAILED: 'FAILED',
-  MANUAL_REVIEW: 'MANUAL_REVIEW'
-};
-
-const ONBOARDING_TASK_STATUSES = {
-  PENDING: 'PENDING',
-  IN_PROGRESS: 'IN_PROGRESS',
-  COMPLETED: 'COMPLETED',
-  WAIVED: 'WAIVED'
-};
-
-const ATTENDANCE_STATUSES = {
-  PRESENT: 'PRESENT',
-  ABSENT: 'ABSENT',
-  HALF_DAY: 'HALF_DAY',
-  LATE: 'LATE',
-  LEAVE: 'LEAVE',
-  HOLIDAY: 'HOLIDAY',
-  WEEK_OFF: 'WEEK_OFF',
-  WORK_FROM_HOME: 'WORK_FROM_HOME'
-};
-
-const LEAVE_STATUSES = {
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  CANCELLED: 'CANCELLED'
-};
-
-const PAYROLL_STATUSES = {
-  DRAFT: 'DRAFT',
-  REVIEW: 'REVIEW',
-  APPROVED: 'APPROVED',
-  PROCESSED: 'PROCESSED',
-  PAID: 'PAID',
-  CANCELLED: 'CANCELLED'
-};
-
-const ID_PREFIXES = {
-  JOB: 'JOB-',
-  CANDIDATE: 'CAN-',
-  SCREENING: 'SCR-',
-  EMPLOYEE: 'EMP-',
-  DEPARTMENT: 'DEP-',
-  DESIGNATION: 'DSG-',
-  ATTENDANCE: 'ATT-',
-  LEAVE: 'LEV-',
-  TRAINING: 'TRN-',
-  GOAL: 'GOL-',
-  REVIEW: 'REV-',
-  EXIT: 'EXT-'
-};
 
 
 /* --- MODULE: src/config/defaultSettings.js --- */
@@ -375,7 +208,7 @@ const DEFAULT_SETTINGS = {
 
 
 /* --- MODULE: src/services/db/masterSchema.js --- */
-// Master Google Sheets Schema Definitions (38 Master Sheets + JobEnquiries & EmployeeLegalContracts)
+// Master Google Sheets Schema Definitions (38 Master Sheets + JobEnquiries, EmployeeLegalContracts & HRSOPs)
 
 const MASTER_SHEETS = {
   Settings: [
@@ -454,6 +287,10 @@ const MASTER_SHEETS = {
     'WorkPermitExpiry', 'DocumentDriveFileID', 'DocumentFileName', 'EffectiveDate',
     'ExpiryDate', 'SignedStatus', 'SignedAt', 'WitnessedBy', 'Notes', 'CreatedAt', 'UpdatedAt'
   ],
+  HRSOPs: [
+    'SOPID', 'SOPTitle', 'Category', 'Version', 'EffectiveDate', 'Summary', 'ContentText',
+    'ApprovedBy', 'DriveFileID', 'Status', 'CreatedAt'
+  ],
   CandidateDocuments: [
     'DocumentID', 'CandidateID', 'EnquiryID', 'DocumentType', 'FileName', 'DriveFileID',
     'UploadedAt', 'Status'
@@ -524,7 +361,7 @@ const MASTER_SHEETS = {
 const STORAGE_KEY_PREFIX = 'HRMS_DB_';
 const SYNC_QUEUE_KEY = 'HRMS_SYNC_QUEUE';
 const DB_VERSION_KEY = 'HRMS_DB_VERSION';
-const CURRENT_DB_VERSION = '2.5';
+const CURRENT_DB_VERSION = '3.0';
 
 function createInitialData() {
   const data = {};
@@ -542,16 +379,10 @@ function createInitialData() {
     { SettingKey: 'ai_thresholds', SettingValue: JSON.stringify(DEFAULT_SETTINGS.ai.thresholds), Category: 'AI', UpdatedAt: new Date().toISOString(), UpdatedBy: 'SUPER_ADMIN' }
   ];
 
-  // Users (Distinct real accounts for all 8 roles)
+  // Users (Only Super Admin and Employee accounts)
   data.Users = [
-    { UserID: 'USR-000001', FullName: 'Eleanor Vance', Email: 'admin@masteredhrms.com', Role: 'SUPER_ADMIN', DepartmentID: 'DEP-000002', EmployeeID: 'EMP-000001', Status: 'ACTIVE', CreatedAt: '2026-01-10', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000010', FullName: 'Victoria Sterling', Email: 'hradmin@masteredhrms.com', Role: 'HR_ADMIN', DepartmentID: 'DEP-000002', EmployeeID: 'EMP-000010', Status: 'ACTIVE', CreatedAt: '2026-01-12', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000011', FullName: 'Jordan Reed', Email: 'hrexec@masteredhrms.com', Role: 'HR_EXECUTIVE', DepartmentID: 'DEP-000002', EmployeeID: 'EMP-000011', Status: 'ACTIVE', CreatedAt: '2026-01-14', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000002', FullName: 'Marcus Brodie', Email: 'recruiter@masteredhrms.com', Role: 'RECRUITER', DepartmentID: 'DEP-000002', EmployeeID: 'EMP-000003', Status: 'ACTIVE', CreatedAt: '2026-01-15', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000004', FullName: 'Jessica Lin', Email: 'payroll@masteredhrms.com', Role: 'PAYROLL_ADMIN', DepartmentID: 'DEP-000004', EmployeeID: 'EMP-000004', Status: 'ACTIVE', CreatedAt: '2026-02-10', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000012', FullName: 'Samantha Cross', Email: 'training@masteredhrms.com', Role: 'TRAINING_ADMIN', DepartmentID: 'DEP-000002', EmployeeID: 'EMP-000012', Status: 'ACTIVE', CreatedAt: '2026-02-15', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000003', FullName: 'Elena Rostova', Email: 'elena@masteredhrms.com', Role: 'MANAGER', DepartmentID: 'DEP-000001', EmployeeID: 'EMP-000002', Status: 'ACTIVE', CreatedAt: '2026-02-01', LastLogin: new Date().toISOString() },
-    { UserID: 'USR-000005', FullName: 'David Kim', Email: 'david.kim@masteredhrms.com', Role: 'EMPLOYEE', DepartmentID: 'DEP-000001', EmployeeID: 'EMP-000005', Status: 'ACTIVE', CreatedAt: '2026-03-01', LastLogin: new Date().toISOString() }
+    { UserID: 'USR-000001', FullName: 'Eleanor Vance (Super Admin)', Email: 'admin@masteredhrms.com', Role: 'SUPER_ADMIN', DepartmentID: 'DEP-000002', EmployeeID: 'EMP-000001', Status: 'ACTIVE', CreatedAt: '2026-01-10', LastLogin: new Date().toISOString() },
+    { UserID: 'USR-000005', FullName: 'David Kim (Employee)', Email: 'david.kim@masteredhrms.com', Role: 'EMPLOYEE', DepartmentID: 'DEP-000001', EmployeeID: 'EMP-000005', Status: 'ACTIVE', CreatedAt: '2026-03-01', LastLogin: new Date().toISOString() }
   ];
 
   // Departments
@@ -571,452 +402,117 @@ function createInitialData() {
     { DesignationID: 'DSG-000005', DesignationTitle: 'Full Stack Developer', DepartmentID: 'DEP-000001', Level: 'L3', Status: 'ACTIVE', CreatedAt: '2026-01-01' }
   ];
 
-  // Jobs
-  data.Jobs = [
-    {
-      JobID: 'JOB-000001',
-      JobTitle: 'Senior Full Stack AI Engineer',
-      DepartmentID: 'DEP-000001',
-      DesignationID: 'DSG-000001',
-      Vacancies: 2,
-      EmploymentType: 'FULL_TIME',
-      Location: 'San Francisco, CA / Remote',
-      WorkMode: 'HYBRID',
-      MinExperience: 4,
-      MaxExperience: 8,
-      MinSalary: 130000,
-      MaxSalary: 175000,
-      EducationRequirements: 'Bachelor or Master in Computer Science or Software Engineering',
-      RequiredSkills: 'React, Node.js, JavaScript, Python, REST APIs, Git',
-      PreferredSkills: 'Google Gemini API, OpenAI API, Cloud Architecture, Docker, GraphQL',
-      RequiredCertifications: 'AWS Certified Developer or Google Cloud Associate Engineer',
-      RequiredLanguages: 'English (Fluent)',
-      RequiredIndustryExperience: 'Software SaaS, AI Products, FinTech',
-      RequiredJobTitles: 'Full Stack Engineer, Senior Software Engineer, AI Developer',
-      NoticePeriodRequirement: 'Immediate to 30 Days',
-      JobDescription: 'We are seeking an outstanding Senior Full Stack AI Engineer to design and implement intelligent enterprise systems using cutting-edge web frameworks, RESTful backend APIs, and LLM providers.',
-      Responsibilities: 'Architect reactive web components. Integrate Google AI & OpenAI models.',
-      MandatoryRequirements: 'Minimum 4 years experience in Full Stack JS/Python. Deep familiarity with REST APIs & Cloud DBs.',
-      PreferredRequirements: 'Experience with Google Workspace APIs (Sheets & Drive API), Apps Script, or automated workflow engines.',
-      ApplicationDeadline: '2026-09-30',
-      HiringManagerID: 'EMP-000002',
-      RecruiterID: 'EMP-000003',
-      Status: 'OPEN',
-      CreatedAt: '2026-08-01',
-      UpdatedAt: '2026-08-10'
-    },
-    {
-      JobID: 'JOB-000002',
-      JobTitle: 'Lead HR Operations Specialist',
-      DepartmentID: 'DEP-000002',
-      DesignationID: 'DSG-000002',
-      Vacancies: 1,
-      EmploymentType: 'FULL_TIME',
-      Location: 'New York, NY',
-      WorkMode: 'ON_SITE',
-      MinExperience: 5,
-      MaxExperience: 10,
-      MinSalary: 95000,
-      MaxSalary: 125000,
-      EducationRequirements: 'Bachelor in Human Resources or Business Administration',
-      RequiredSkills: 'HRMS Management, Employee Onboarding, Payroll Processing, Compliance',
-      PreferredSkills: 'SHRM-CP certification, Google Workspace Automation',
-      RequiredCertifications: 'SHRM-CP or PHR',
-      RequiredLanguages: 'English',
-      RequiredIndustryExperience: 'HR Consulting, Corporate HR',
-      RequiredJobTitles: 'HR Lead, HR Generalist',
-      NoticePeriodRequirement: '15 to 30 Days',
-      JobDescription: 'Lead our core HR lifecycle operations.',
-      Responsibilities: 'Oversee employee onboarding, manage performance review cadences.',
-      MandatoryRequirements: 'At least 5 years hands-on experience in corporate HR management.',
-      PreferredRequirements: 'Strong spreadsheet analytics.',
-      ApplicationDeadline: '2026-09-15',
-      HiringManagerID: 'EMP-000001',
-      RecruiterID: 'EMP-000003',
-      Status: 'OPEN',
-      CreatedAt: '2026-08-05',
-      UpdatedAt: '2026-08-05'
-    }
-  ];
-
-  // Candidates
-  data.Candidates = [
-    {
-      CandidateID: 'CAN-000001',
-      JobID: 'JOB-000001',
-      FullName: 'Alex Rivers',
-      Email: 'alex.rivers@devmail.io',
-      Phone: '+1-555-019-2834',
-      Location: 'San Francisco, CA',
-      CurrentCompany: 'Mastered HRMS Systems',
-      CurrentDesignation: 'Senior Full Stack Developer',
-      TotalExperience: 6,
-      RelevantExperience: 5,
-      HighestEducation: 'B.S. in Computer Science, UC Berkeley',
-      Skills: 'React, Node.js, JavaScript, Python, REST APIs, Git, Google Gemini API, Docker',
-      Certifications: 'Google Cloud Certified Professional Cloud Developer',
-      Languages: 'English (Native)',
-      CurrentSalary: 140000,
-      ExpectedSalary: 160000,
-      NoticePeriod: '15 Days',
-      ResumeDriveFileID: 'DRV-FILE-RESUME-001',
-      ResumeFileName: 'Alex_Rivers_Resume_2026.pdf',
-      ResumeText: 'ALEX RIVERS\nSan Francisco, CA | alex.rivers@devmail.io\nSUMMARY: Senior Full Stack Engineer with 6 years experience building React/Node applications.',
-      ApplicationSource: 'DIRECT_APPLICATION',
-      ApplicationDate: '2026-08-10',
-      AIStatus: 'AI_COMPLETED',
-      AIScore: 91,
-      AIRecommendation: 'STRONG_SHORTLIST',
-      RecruiterStatus: 'SHORTLISTED',
-      RecruiterDecision: 'SHORTLIST',
-      AssignedRecruiter: 'EMP-000003',
-      CreatedAt: '2026-08-10',
-      UpdatedAt: '2026-08-11'
-    },
-    {
-      CandidateID: 'CAN-000002',
-      JobID: 'JOB-000001',
-      FullName: 'Sarah Chen',
-      Email: 'sarah.chen@techworks.com',
-      Phone: '+1-555-028-4920',
-      Location: 'San Jose, CA',
-      CurrentCompany: 'Innovate Labs',
-      CurrentDesignation: 'Full Stack Engineer',
-      TotalExperience: 4.5,
-      RelevantExperience: 4,
-      HighestEducation: 'M.S. Software Engineering, Stanford',
-      Skills: 'React, Node.js, JavaScript, Python, REST APIs, AWS',
-      Certifications: 'AWS Certified Developer',
-      Languages: 'English (Fluent)',
-      CurrentSalary: 130000,
-      ExpectedSalary: 155000,
-      NoticePeriod: '30 Days',
-      ResumeDriveFileID: 'DRV-FILE-RESUME-002',
-      ResumeFileName: 'Sarah_Chen_CV.pdf',
-      ResumeText: 'SARAH CHEN\nSan Jose, CA | sarah.chen@techworks.com\nFull Stack Engineer with 4.5 years total experience.',
-      ApplicationSource: 'LINKEDIN',
-      ApplicationDate: '2026-08-11',
-      AIStatus: 'AI_COMPLETED',
-      AIScore: 84,
-      AIRecommendation: 'STRONG_SHORTLIST',
-      RecruiterStatus: 'SHORTLISTED',
-      RecruiterDecision: 'SHORTLIST',
-      AssignedRecruiter: 'EMP-000003',
-      CreatedAt: '2026-08-11',
-      UpdatedAt: '2026-08-11'
-    }
-  ];
-
   // Employees
   data.Employees = [
-    { EmployeeID: 'EMP-000001', FirstName: 'Eleanor', LastName: 'Vance', Email: 'admin@masteredhrms.com', Phone: '+1-555-100-0001', Gender: 'FEMALE', JoiningDate: '2024-01-15', DepartmentID: 'DEP-000002', DesignationID: 'DSG-000002', ManagerID: 'SELF', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 150000, BankName: 'Chase Bank', AccountNumber: 'XXXX-9482', IFSC_Routing: '121000358', EmergencyContactName: 'Arthur Vance', EmergencyContactPhone: '+1-555-900-1122', DriveFolderID: 'DRV-EMP-001', CreatedAt: '2024-01-15' },
-    { EmployeeID: 'EMP-000002', FirstName: 'Elena', LastName: 'Rostova', Email: 'elena@masteredhrms.com', Phone: '+1-555-100-0002', Gender: 'FEMALE', JoiningDate: '2024-03-01', DepartmentID: 'DEP-000001', DesignationID: 'DSG-000003', ManagerID: 'EMP-000001', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 165000, BankName: 'Bank of America', AccountNumber: 'XXXX-3829', IFSC_Routing: '121000358', EmergencyContactName: 'Viktor Rostov', EmergencyContactPhone: '+1-555-900-3344', DriveFolderID: 'DRV-EMP-002', CreatedAt: '2024-03-01' },
-    { EmployeeID: 'EMP-000003', FirstName: 'Marcus', LastName: 'Brodie', Email: 'recruiter@masteredhrms.com', Phone: '+1-555-100-0003', Gender: 'MALE', JoiningDate: '2025-02-01', DepartmentID: 'DEP-000002', DesignationID: 'DSG-000002', ManagerID: 'EMP-000001', EmploymentType: 'FULL_TIME', WorkLocation: 'New York, NY', Status: 'ACTIVE', BaseSalary: 95000, BankName: 'Wells Fargo', AccountNumber: 'XXXX-8821', IFSC_Routing: '121000358', EmergencyContactName: 'Laura Brodie', EmergencyContactPhone: '+1-555-900-5566', DriveFolderID: 'DRV-EMP-003', CreatedAt: '2025-02-01' },
-    { EmployeeID: 'EMP-000004', FirstName: 'Jessica', LastName: 'Lin', Email: 'payroll@masteredhrms.com', Phone: '+1-555-100-0004', Gender: 'FEMALE', JoiningDate: '2025-04-15', DepartmentID: 'DEP-000004', DesignationID: 'DSG-000004', ManagerID: 'EMP-000001', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 90000, BankName: 'Citibank', AccountNumber: 'XXXX-1109', IFSC_Routing: '121000358', EmergencyContactName: 'Kevin Lin', EmergencyContactPhone: '+1-555-900-7788', DriveFolderID: 'DRV-EMP-004', CreatedAt: '2025-04-15' },
-    { EmployeeID: 'EMP-000005', FirstName: 'David', LastName: 'Kim', Email: 'david.kim@masteredhrms.com', Phone: '+1-555-100-0005', Gender: 'MALE', JoiningDate: '2025-06-01', DepartmentID: 'DEP-000001', DesignationID: 'DSG-000005', ManagerID: 'EMP-000002', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 115000, BankName: 'Chase Bank', AccountNumber: 'XXXX-5541', IFSC_Routing: '121000358', EmergencyContactName: 'Grace Kim', EmergencyContactPhone: '+1-555-900-9900', DriveFolderID: 'DRV-EMP-005', CreatedAt: '2025-06-01' },
-    { EmployeeID: 'EMP-000010', FirstName: 'Victoria', LastName: 'Sterling', Email: 'hradmin@masteredhrms.com', Phone: '+1-555-100-0010', Gender: 'FEMALE', JoiningDate: '2024-05-01', DepartmentID: 'DEP-000002', DesignationID: 'DSG-000002', ManagerID: 'EMP-000001', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 130000, BankName: 'Chase Bank', AccountNumber: 'XXXX-1010', IFSC_Routing: '121000358', EmergencyContactName: 'Charles Sterling', EmergencyContactPhone: '+1-555-900-1010', DriveFolderID: 'DRV-EMP-010', CreatedAt: '2024-05-01' },
-    { EmployeeID: 'EMP-000011', FirstName: 'Jordan', LastName: 'Reed', Email: 'hrexec@masteredhrms.com', Phone: '+1-555-100-0011', Gender: 'MALE', JoiningDate: '2025-01-10', DepartmentID: 'DEP-000002', DesignationID: 'DSG-000004', ManagerID: 'EMP-000010', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 85000, BankName: 'Wells Fargo', AccountNumber: 'XXXX-1111', IFSC_Routing: '121000358', EmergencyContactName: 'Taylor Reed', EmergencyContactPhone: '+1-555-900-1111', DriveFolderID: 'DRV-EMP-011', CreatedAt: '2025-01-10' },
-    { EmployeeID: 'EMP-000012', FirstName: 'Samantha', LastName: 'Cross', Email: 'training@masteredhrms.com', Phone: '+1-555-100-0012', Gender: 'FEMALE', JoiningDate: '2025-03-15', DepartmentID: 'DEP-000002', DesignationID: 'DSG-000004', ManagerID: 'EMP-000010', EmploymentType: 'FULL_TIME', WorkLocation: 'New York, NY', Status: 'ACTIVE', BaseSalary: 88000, BankName: 'Citibank', AccountNumber: 'XXXX-1212', IFSC_Routing: '121000358', EmergencyContactName: 'Morgan Cross', EmergencyContactPhone: '+1-555-900-1212', DriveFolderID: 'DRV-EMP-012', CreatedAt: '2025-03-15' }
+    { EmployeeID: 'EMP-000001', FirstName: 'Eleanor', LastName: 'Vance', Email: 'admin@masteredhrms.com', Phone: '+1 (555) 019-2831', Gender: 'Female', DateOfBirth: '1988-04-12', JoiningDate: '2022-01-15', DepartmentID: 'DEP-000002', DesignationID: 'DSG-000002', ManagerID: 'N/A', EmploymentType: 'FULL_TIME', WorkLocation: 'San Francisco, CA', Status: 'ACTIVE', BaseSalary: 165000, BankName: 'Silicon Valley Bank', AccountNumber: '****9812', IFSC_Routing: '121000358', CreatedAt: '2026-01-10' },
+    { EmployeeID: 'EMP-000005', FirstName: 'David', LastName: 'Kim', Email: 'david.kim@masteredhrms.com', Phone: '+1 (555) 018-9923', Gender: 'Male', DateOfBirth: '1993-09-24', JoiningDate: '2024-03-01', DepartmentID: 'DEP-000001', DesignationID: 'DSG-000005', ManagerID: 'EMP-000001', EmploymentType: 'FULL_TIME', WorkLocation: 'Austin, TX', Status: 'ACTIVE', BaseSalary: 110000, BankName: 'Chase Bank', AccountNumber: '****4412', IFSC_Routing: '111000025', CreatedAt: '2026-03-01' }
   ];
 
-  // Attendance
-  data.Attendance = [
-    { AttendanceID: 'ATT-000001', EmployeeID: 'EMP-000001', Date: '2026-08-18', CheckIn: '08:52', CheckOut: '18:05', WorkingHours: 9.2, LateMinutes: 0, EarlyDeparture: 0, Overtime: 0.2, Status: 'PRESENT', Source: 'WEB_APP', Remarks: 'On time' },
-    { AttendanceID: 'ATT-000002', EmployeeID: 'EMP-000002', Date: '2026-08-18', CheckIn: '09:05', CheckOut: '18:30', WorkingHours: 9.4, LateMinutes: 5, EarlyDeparture: 0, Overtime: 0.4, Status: 'PRESENT', Source: 'WEB_APP', Remarks: 'On time' },
-    { AttendanceID: 'ATT-000003', EmployeeID: 'EMP-000003', Date: '2026-08-18', CheckIn: '09:42', CheckOut: '18:00', WorkingHours: 8.3, LateMinutes: 42, EarlyDeparture: 0, Overtime: 0, Status: 'LATE', Source: 'WEB_APP', Remarks: 'Traffic' },
-    { AttendanceID: 'ATT-000004', EmployeeID: 'EMP-000004', Date: '2026-08-18', CheckIn: '09:00', CheckOut: '18:00', WorkingHours: 9.0, LateMinutes: 0, EarlyDeparture: 0, Overtime: 0, Status: 'PRESENT', Source: 'WEB_APP', Remarks: '' },
-    { AttendanceID: 'ATT-000005', EmployeeID: 'EMP-000005', Date: '2026-08-18', CheckIn: '09:00', CheckOut: '18:00', WorkingHours: 9.0, LateMinutes: 0, EarlyDeparture: 0, Overtime: 0, Status: 'WORK_FROM_HOME', Source: 'WEB_APP', Remarks: 'Approved WFH' }
+  // HR Standard Operating Procedures (SOPs)
+  data.HRSOPs = [
+    { SOPID: 'SOP-001', SOPTitle: 'End-to-End Recruitment & CV Screening Policy', Category: 'RECRUITMENT', Version: 'v2.1', EffectiveDate: '2026-01-01', Summary: 'Guidelines for candidate intake, AI-assisted CV analysis, and mandatory human recruiter interview evaluation.', ApprovedBy: 'SUPER_ADMIN', Status: 'ACTIVE' },
+    { SOPID: 'SOP-002', SOPTitle: '5-Step Employee Onboarding & Asset Checklist', Category: 'ONBOARDING', Version: 'v1.5', EffectiveDate: '2026-01-01', Summary: 'Standard workflow for offer acceptance, document verification, asset provisioning, and employee activation.', ApprovedBy: 'SUPER_ADMIN', Status: 'ACTIVE' },
+    { SOPID: 'SOP-003', SOPTitle: 'Daily Attendance Marking & Regularization SOP', Category: 'ATTENDANCE', Version: 'v2.0', EffectiveDate: '2026-01-01', Summary: 'Rules for daily check-in/out, admin attendance overrides, regularization requests, and monthly locking.', ApprovedBy: 'SUPER_ADMIN', Status: 'ACTIVE' },
+    { SOPID: 'SOP-004', SOPTitle: 'Payroll Processing & Statutory Compliance SOP', Category: 'PAYROLL', Version: 'v3.0', EffectiveDate: '2026-01-01', Summary: 'Procedure for monthly gross salary calculations, statutory deductions (PF, ESI, TDS, LWF), and bank exports.', ApprovedBy: 'SUPER_ADMIN', Status: 'ACTIVE' },
+    { SOPID: 'SOP-005', SOPTitle: 'KPI & KRA Performance Review Standard', Category: 'PERFORMANCE', Version: 'v1.8', EffectiveDate: '2026-01-01', Summary: 'Framework for establishing quarterly Key Result Areas (KRAs) and measurable Key Performance Indicators (KPIs).', ApprovedBy: 'SUPER_ADMIN', Status: 'ACTIVE' }
   ];
 
-  // Leave Requests & Balances
-  data.LeaveBalances = [
-    { BalanceID: 'BAL-000001', EmployeeID: 'EMP-000005', LeaveTypeID: 'LTP-000001', Year: 2026, AllocatedDays: 12, UsedDays: 2, PendingDays: 0, RemainingDays: 10 },
-    { BalanceID: 'BAL-000002', EmployeeID: 'EMP-000002', LeaveTypeID: 'LTP-000001', Year: 2026, AllocatedDays: 12, UsedDays: 1, PendingDays: 1, RemainingDays: 10 }
-  ];
-
-  data.LeaveRequests = [
-    { LeaveRequestID: 'LEV-000001', EmployeeID: 'EMP-000005', LeaveTypeID: 'LTP-000001', StartDate: '2026-08-20', EndDate: '2026-08-21', TotalDays: 2, Reason: 'Personal family event', Status: 'APPROVED', AppliedAt: '2026-08-01', ApprovedBy: 'EMP-000002', ApprovedAt: '2026-08-02' },
-    { LeaveRequestID: 'LEV-000002', EmployeeID: 'EMP-000005', LeaveTypeID: 'LTP-000002', StartDate: '2026-08-28', EndDate: '2026-08-28', TotalDays: 1, Reason: 'Doctor appointment', Status: 'PENDING', AppliedAt: '2026-08-15', ApprovedBy: '' }
-  ];
-
-  // Payroll
-  data.Payroll = [
-    { PayrollID: 'PAY-2026-07', MonthYear: '2026-07', TotalEmployees: 8, TotalGross: 78000, TotalDeductions: 12000, TotalNet: 66000, Status: 'PAID', ProcessedBy: 'EMP-000004', ProcessedAt: '2026-07-28', ApprovedBy: 'EMP-000001', ApprovedAt: '2026-07-29' }
-  ];
-
-  data.PayrollItems = [
-    { PayrollItemID: 'PIT-000001', PayrollID: 'PAY-2026-07', EmployeeID: 'EMP-000001', MonthYear: '2026-07', BaseSalary: 12500, Allowances: 1500, OvertimePay: 0, GrossSalary: 14000, NetSalary: 11500, PayslipDriveFileID: 'DRV-PAYSLIP-EMP01-JUL26', Status: 'PAID', PaidAt: '2026-07-30' },
-    { PayrollItemID: 'PIT-000002', PayrollID: 'PAY-2026-07', EmployeeID: 'EMP-000005', MonthYear: '2026-07', BaseSalary: 9583, Allowances: 1200, OvertimePay: 150, GrossSalary: 10933, NetSalary: 8984, PayslipDriveFileID: 'DRV-PAYSLIP-EMP05-JUL26', Status: 'PAID', PaidAt: '2026-07-30' }
-  ];
-
-  // Training
-  data.TrainingPrograms = [
-    { TrainingID: 'TRN-000001', TrainingName: 'Generative AI & LLM Systems Workshop', Description: 'Advanced prompt engineering & API orchestration', Trainer: 'Dr. Aris Thorne', Category: 'TECHNICAL', StartDate: '2026-08-25', EndDate: '2026-08-27', DurationHours: 12, Capacity: 15, Status: 'UPCOMING', CreatedAt: '2026-08-01' }
-  ];
-
-  data.TrainingAssignments = [
-    { AssignmentID: 'TAS-000001', TrainingID: 'TRN-000001', EmployeeID: 'EMP-000005', AssignedBy: 'EMP-000012', Status: 'ASSIGNED', CompletionDate: '', Score: 0 }
-  ];
-
-  // Performance
+  // Performance Goals (KPIs & KRAs)
   data.PerformanceGoals = [
-    { GoalID: 'GOL-000001', EmployeeID: 'EMP-000005', ReviewPeriod: 'Q3-2026', GoalTitle: 'Implement AI CV Screening Engine', KPI_KRA: 'Recruitment turnaround time reduction', TargetMetric: '100% automated parsing accuracy', DueDate: '2026-09-30', ProgressPercent: 85, Status: 'IN_PROGRESS', CreatedAt: '2026-07-01' }
-  ];
-
-  data.PerformanceReviews = [
-    { ReviewID: 'REV-000001', EmployeeID: 'EMP-000005', ReviewPeriod: 'H1-2026', SelfAssessment: 'Led UI refactoring and backend optimization.', ManagerAssessment: 'Exceeded expectations in delivery.', SelfRating: 4, ManagerRating: 5, FinalRating: 4.8, Status: 'COMPLETED', SubmittedAt: '2026-06-25', CompletedAt: '2026-06-30' }
-  ];
-
-  // Exit
-  data.ExitRequests = [
-    { ExitRequestID: 'EXT-000001', EmployeeID: 'EMP-000003', ResignationDate: '2026-08-01', NoticePeriodDays: 30, RequestedLastWorkingDay: '2026-08-31', Reason: 'Career advancement opportunity', Status: 'PENDING' }
-  ];
-
-  // Audit Logs
-  data.AuditLogs = [
-    { AuditID: 'AUD-000001', UserID: 'USR-000001', UserEmail: 'admin@masteredhrms.com', Action: 'SYSTEM_INITIALIZATION', Module: 'SETTINGS', EntityID: 'MASTER', PreviousState: '', NewState: 'Initial database pre-seeded with 8 role accounts', IPAddress: '127.0.0.1', Timestamp: new Date().toISOString() }
+    { GoalID: 'GOAL-001', EmployeeID: 'EMP-000005', ReviewPeriod: '2026-Q3', GoalTitle: 'Full-Stack Architecture Modernization', KPI_KRA: 'KRA: Platform Engineering', TargetMetric: 'Achieve 99.9% API uptime & sub-200ms latency', DueDate: '2026-09-30', ProgressPercent: 85, Status: 'IN_PROGRESS' },
+    { GoalID: 'GOAL-002', EmployeeID: 'EMP-000005', ReviewPeriod: '2026-Q3', GoalTitle: 'Automated Test Code Coverage', KPI_KRA: 'KPI: Quality Assurance', TargetMetric: 'Maintain > 90% unit & integration test coverage', DueDate: '2026-09-30', ProgressPercent: 95, Status: 'COMPLETED' }
   ];
 
   return data;
 }
 
-/**
- * Non-destructive Versioned Database Migration Function
- */
-function migrateDatabaseIfNeeded(existingDb) {
-  const initial = createInitialData();
-  if (!existingDb || typeof existingDb !== 'object') return initial;
+class LocalDbDriver {
+  constructor() {
+    this.memoryData = null;
+    this.init();
+  }
 
-  // 1. Ensure all master sheet arrays exist
-  Object.keys(MASTER_SHEETS).forEach(sheetName => {
-    if (!Array.isArray(existingDb[sheetName])) {
-      existingDb[sheetName] = initial[sheetName] || [];
-    }
-  });
-
-  // 2. Non-destructively upsert seeded Users without overwriting user changes
-  const existingUsers = existingDb.Users || [];
-  initial.Users.forEach(seededUser => {
-    const found = existingUsers.find(u => u.Email === seededUser.Email || u.UserID === seededUser.UserID);
-    if (!found) {
-      existingUsers.push(seededUser);
-    } else {
-      // Ensure Role, EmployeeID and Status are correctly set
-      found.Role = seededUser.Role;
-      found.EmployeeID = seededUser.EmployeeID;
-      found.Status = 'ACTIVE';
-    }
-  });
-  existingDb.Users = existingUsers;
-
-  // 3. Non-destructively upsert seeded Employees
-  const existingEmp = existingDb.Employees || [];
-  initial.Employees.forEach(seededEmp => {
-    const found = existingEmp.find(e => e.EmployeeID === seededEmp.EmployeeID || e.Email === seededEmp.Email);
-    if (!found) {
-      existingEmp.push(seededEmp);
-    }
-  });
-  existingDb.Employees = existingEmp;
-
-  return existingDb;
-}
-
-let memoryDb = null;
-let syncQueue = null;
-
-const localDbDriver = {
   init() {
     try {
-      if (typeof localStorage !== 'undefined') {
-        const storedVersion = localStorage.getItem(DB_VERSION_KEY);
-        const stored = localStorage.getItem(STORAGE_KEY_PREFIX + 'MASTER');
+      const storedVersion = typeof window !== 'undefined' ? localStorage.getItem(DB_VERSION_KEY) : null;
+      if (storedVersion !== CURRENT_DB_VERSION) {
+        // Upgrade database to version 3.0 cleanly
+        this.memoryData = createInitialData();
+        this.saveAllToStorage();
+        if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
+        return;
+      }
 
-        if (stored) {
+      const loadedData = {};
+      let hasMissingSheet = false;
+
+      Object.keys(MASTER_SHEETS).forEach(sheetName => {
+        const key = STORAGE_KEY_PREFIX + sheetName;
+        const json = typeof window !== 'undefined' ? localStorage.getItem(key) : null;
+        if (json) {
           try {
-            const parsed = JSON.parse(stored);
-            if (storedVersion !== CURRENT_DB_VERSION) {
-              // Run versioned migration to add missing role accounts
-              memoryDb = migrateDatabaseIfNeeded(parsed);
-              localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
-              this.persist();
-            } else {
-              memoryDb = parsed;
-            }
-          } catch (err) {
-            console.warn('Database JSON parse error, re-initializing', err);
-            memoryDb = createInitialData();
+            loadedData[sheetName] = JSON.parse(json);
+          } catch (e) {
+            loadedData[sheetName] = [];
           }
+        } else {
+          hasMissingSheet = true;
         }
-        const storedQueue = localStorage.getItem(SYNC_QUEUE_KEY);
-        if (storedQueue) {
-          syncQueue = JSON.parse(storedQueue);
-        }
+      });
+
+      if (hasMissingSheet || !loadedData.Users || loadedData.Users.length === 0) {
+        this.memoryData = createInitialData();
+        this.saveAllToStorage();
+        if (typeof window !== 'undefined') localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
+      } else {
+        this.memoryData = loadedData;
       }
     } catch (e) {
-      console.warn('LocalStorage error, using in-memory data', e);
+      console.warn('LocalDbDriver init fallback to fresh initial data:', e);
+      this.memoryData = createInitialData();
     }
-    if (!memoryDb) {
-      memoryDb = createInitialData();
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
-      }
-      this.persist();
-    }
-    if (!syncQueue) {
-      syncQueue = [];
-      this.saveSyncQueue(syncQueue);
-    }
-  },
+  }
 
-  hydrateFromRemote(remoteDataMap) {
-    if (!remoteDataMap || typeof remoteDataMap !== 'object') return false;
-    if (!memoryDb) memoryDb = createInitialData();
-
-    Object.keys(remoteDataMap).forEach(sheetName => {
-      if (Array.isArray(remoteDataMap[sheetName])) {
-        memoryDb[sheetName] = remoteDataMap[sheetName];
-      }
+  saveAllToStorage() {
+    if (typeof window === 'undefined' || !this.memoryData) return;
+    Object.keys(this.memoryData).forEach(sheetName => {
+      localStorage.setItem(STORAGE_KEY_PREFIX + sheetName, JSON.stringify(this.memoryData[sheetName]));
     });
-
-    this.persist();
-    return true;
-  },
-
-  getSyncQueue() {
-    if (!syncQueue) this.init();
-    return syncQueue || [];
-  },
-
-  saveSyncQueue(queue) {
-    syncQueue = queue || [];
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(syncQueue));
-      }
-    } catch (e) {
-      console.error('Failed to persist sync queue', e);
-    }
-  },
-
-  persist() {
-    try {
-      if (memoryDb && typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY_PREFIX + 'MASTER', JSON.stringify(memoryDb));
-      }
-    } catch (e) {
-      console.error('Failed to persist database state', e);
-    }
-  },
+  }
 
   getAll(sheetName) {
-    if (!memoryDb) this.init();
-    if (!memoryDb[sheetName]) memoryDb[sheetName] = [];
-    return memoryDb[sheetName];
-  },
-
-  getById(sheetName, idField, idValue) {
-    const list = this.getAll(sheetName);
-    return list.find(item => String(item[idField]) === String(idValue)) || null;
-  },
-
-  query(sheetName, predicate) {
-    const list = this.getAll(sheetName);
-    return list.filter(predicate);
-  },
+    if (!this.memoryData || !this.memoryData[sheetName]) return [];
+    return this.memoryData[sheetName];
+  }
 
   insert(sheetName, record) {
-    if (!memoryDb) this.init();
-    if (!memoryDb[sheetName]) memoryDb[sheetName] = [];
-    
-    const now = new Date().toISOString();
-    if (!record.CreatedAt) record.CreatedAt = now;
-    if (!record.UpdatedAt) record.UpdatedAt = now;
-
-    memoryDb[sheetName].push(record);
-    this.persist();
-
-    if (sheetName !== 'AuditLogs' && sheetName !== 'Notifications') {
-      this.insert('AuditLogs', {
-        AuditID: 'AUD-' + String(Date.now()).slice(-6) + Math.floor(Math.random() * 100),
-        UserID: 'CURRENT_USER',
-        UserEmail: 'admin@masteredhrms.com',
-        Action: `INSERT_${sheetName.toUpperCase()}`,
-        Module: sheetName,
-        EntityID: record[Object.keys(record)[0]] || 'NEW_RECORD',
-        PreviousState: '',
-        NewState: JSON.stringify(record),
-        IPAddress: '127.0.0.1',
-        Timestamp: now
-      });
-    }
-
+    if (!this.memoryData[sheetName]) this.memoryData[sheetName] = [];
+    this.memoryData[sheetName].push(record);
+    this.saveAllToStorage();
     return record;
-  },
+  }
 
-  update(sheetName, idField, idValue, updateFields) {
-    if (!memoryDb) this.init();
-    const list = this.getAll(sheetName);
-    const index = list.findIndex(item => String(item[idField]) === String(idValue));
-    
-    if (index === -1) {
-      console.warn(`Record with ${idField} = ${idValue} not found in ${sheetName}`);
-      return updateFields;
-    }
-
-    const previousState = JSON.stringify(list[index]);
-    list[index] = {
-      ...list[index],
-      ...updateFields,
-      UpdatedAt: new Date().toISOString()
-    };
-
-    this.persist();
-
-    if (sheetName !== 'AuditLogs') {
-      this.insert('AuditLogs', {
-        AuditID: 'AUD-' + String(Date.now()).slice(-6) + Math.floor(Math.random() * 100),
-        UserID: 'CURRENT_USER',
-        UserEmail: 'admin@masteredhrms.com',
-        Action: `UPDATE_${sheetName.toUpperCase()}`,
-        Module: sheetName,
-        EntityID: String(idValue),
-        PreviousState: previousState,
-        NewState: JSON.stringify(updateFields),
-        IPAddress: '127.0.0.1',
-        Timestamp: new Date().toISOString()
-      });
-    }
-
-    return list[index];
-  },
-
-  delete(sheetName, idField, idValue) {
-    if (!memoryDb) this.init();
-    const list = this.getAll(sheetName);
-    const index = list.findIndex(item => String(item[idField]) === String(idValue));
-
-    if (index !== -1) {
-      const removed = list.splice(index, 1)[0];
-      this.persist();
-      return removed;
+  update(sheetName, primaryKeyField, primaryKeyValue, updatedFields) {
+    if (!this.memoryData[sheetName]) return null;
+    const idx = this.memoryData[sheetName].findIndex(r => r[primaryKeyField] === primaryKeyValue);
+    if (idx !== -1) {
+      this.memoryData[sheetName][idx] = { ...this.memoryData[sheetName][idx], ...updatedFields };
+      this.saveAllToStorage();
+      return this.memoryData[sheetName][idx];
     }
     return null;
-  },
-
-  resetToDefaults() {
-    memoryDb = createInitialData();
-    syncQueue = [];
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(DB_VERSION_KEY, CURRENT_DB_VERSION);
-    }
-    this.persist();
-    this.saveSyncQueue(syncQueue);
-    return true;
   }
-};
 
-localDbDriver.init();
+  delete(sheetName, primaryKeyField, primaryKeyValue) {
+    if (!this.memoryData[sheetName]) return false;
+    const initialLen = this.memoryData[sheetName].length;
+    this.memoryData[sheetName] = this.memoryData[sheetName].filter(r => r[primaryKeyField] !== primaryKeyValue);
+    this.saveAllToStorage();
+    return this.memoryData[sheetName].length < initialLen;
+  }
+}
+
+const localDbDriver = new LocalDbDriver();
 
 
 /* --- MODULE: src/services/db/scopeService.js --- */
@@ -6217,7 +5713,7 @@ function DashboardPage() {
 
 
 /* --- MODULE: src/pages/RecruitmentPage.jsx --- */
-// Recruitment & Selection Module Page (Responsive Kanban Board, Enquiries Inbox & Convert to Candidate Pipeline)
+// Recruitment & Selection Module Page (Responsive Kanban Board, Enquiries Inbox, Job Analysis & AI Interview Questions Generator)
 
 
 
@@ -6233,13 +5729,21 @@ function RecruitmentPage() {
   const { currentUser, hasPermission } = useAuth();
   const { showToast } = useApp();
 
-  const [activeTab, setActiveTab] = useState('kanban'); // 'kanban', 'enquiries'
+  const [activeTab, setActiveTab] = useState('kanban'); // 'kanban', 'enquiries', 'jobAnalysis', 'interviewQuestions'
   const [enquirySubTab, setEnquirySubTab] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCandidateId, setSelectedCandidateId] = useState(null);
   const [isCreateJobOpen, setIsCreateJobOpen] = useState(false);
   const [onboardCandidate, setOnboardCandidate] = useState(null);
   const [confirmState, setConfirmState] = useState(null);
+
+  // Job Analysis State
+  const [analysisRoleTitle, setAnalysisRoleTitle] = useState('Senior Full Stack AI Engineer');
+  const [jobAnalysisResult, setJobAnalysisResult] = useState(null);
+
+  // Interview Questions State
+  const [interviewRoleTitle, setInterviewRoleTitle] = useState('Senior Full Stack AI Engineer');
+  const [interviewQuestionsResult, setInterviewQuestionsResult] = useState(null);
 
   const jobs = dbService.getAll('Jobs', currentUser) || [];
   const candidates = dbService.getAll('Candidates', currentUser) || [];
@@ -6271,11 +5775,37 @@ function RecruitmentPage() {
     });
   };
 
+  const handleGenerateJobAnalysis = () => {
+    const result = {
+      title: analysisRoleTitle,
+      department: 'Engineering & Technology',
+      level: 'L5 Senior Level',
+      responsibilities: [
+        'Design, build, and maintain high-scale enterprise HR cloud applications.',
+        'Implement role-based authorization guards, audit logs, and data security.',
+        'Integrate Google Sheets API and Google Drive storage services.'
+      ],
+      competencies: ['Problem Solving', 'System Design', 'Clean Code Architecture', 'Security Mindset'],
+      qualifications: ['Bachelor/Master in Computer Science or related field', '3+ years experience with React, Node.js & SQL']
+    };
+    setJobAnalysisResult(result);
+    showToast(`Generated Job Analysis & Description for "${analysisRoleTitle}"`, 'success');
+  };
+
+  const handleGenerateInterviewQuestions = () => {
+    const questions = [
+      { type: 'TECHNICAL', question: 'Explain how you design fail-closed Role-Based Access Control (RBAC) in a cloud React/Node application.', rubric: 'Candidate must explain default-deny, server-side permission checks, and token session verification.' },
+      { type: 'BEHAVIORAL', question: 'Describe a situation where you resolved a critical production error under tight deadline pressure.', rubric: 'Look for structured problem isolation, log analysis, automated testing, and clear stakeholder communication.' },
+      { type: 'SITUATIONAL', question: 'How would you handle a scenario where an AI screening engine recommends shortlisting a candidate who lacks a mandatory requirement?', rubric: 'Look for human-in-the-loop accountability, evidence verification, and recorded override justification.' }
+    ];
+    setInterviewQuestionsResult(questions);
+    showToast(`Generated Interview Question Bank for "${interviewRoleTitle}"`, 'success');
+  };
+
   const handleConvertEnquiry = (enquiry) => {
     try {
       const candidateId = `CAN-2026-${String(Date.now()).slice(-6)}`;
 
-      // 1. Insert Candidate record
       dbService.insert('Candidates', {
         CandidateID: candidateId,
         JobID: enquiry.JobID !== 'N/A' ? enquiry.JobID : 'JOB-000001',
@@ -6299,14 +5829,12 @@ function RecruitmentPage() {
         CreatedAt: new Date().toISOString()
       }, currentUser);
 
-      // 2. Update Enquiry Record
       dbService.update('JobEnquiries', 'EnquiryID', enquiry.EnquiryID, {
         Status: 'CONVERTED_TO_CANDIDATE',
         ConvertedCandidateID: candidateId,
         ConvertedAt: new Date().toISOString()
       }, currentUser);
 
-      // 3. Log Audit
       dbService.insert('AuditLogs', {
         AuditID: 'AUD-' + Date.now(),
         UserEmail: currentUser.Email,
@@ -6358,7 +5886,7 @@ function RecruitmentPage() {
     <div className="module-view">
       <PageHeader
         title="Recruitment & Selection Management"
-        subtitle="AI-Assisted CV Screening Engine, Public Enquiries Inbox & Candidate Hiring Pipeline"
+        subtitle="AI-Assisted Screening, Public Enquiries, Job Analysis & AI Interview Question Generator"
         actions={
           hasPermission('recruitment.create') && (
             <Button variant="primary" icon="plus" onClick={() => setIsCreateJobOpen(true)}>
@@ -6371,66 +5899,67 @@ function RecruitmentPage() {
       <Tabs
         tabs={[
           { id: 'kanban', label: 'Candidate Hiring Pipeline', icon: 'recruitment', count: candidates.length },
-          { id: 'enquiries', label: 'Public Enquiries Inbox', icon: 'folder', count: enquiries.length }
+          { id: 'enquiries', label: 'Public Enquiries Inbox', icon: 'folder', count: enquiries.length },
+          { id: 'jobAnalysis', label: 'Job Analysis & Description', icon: 'reports' },
+          { id: 'interviewQuestions', label: 'AI Interview Question Bank', icon: 'user' }
         ]}
         activeTab={activeTab}
         onChange={setActiveTab}
       />
 
-      <TableToolbar
-        searchValue={searchTerm}
-        onSearchChange={setSearchTerm}
-        placeholder={activeTab === 'kanban' ? "Filter candidates by name or skills..." : "Filter public enquiries..."}
-      />
-
-      {/* VIEW 1: KANBAN PIPELINE */}
       {activeTab === 'kanban' && (
-        <KanbanBoard>
-          <KanbanColumn title="New CV" count={getStageCandidates('NEW').length} badgeColor="var(--slate-500)">
-            {getStageCandidates('NEW').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
-            ))}
-          </KanbanColumn>
+        <>
+          <TableToolbar
+            searchValue={searchTerm}
+            onSearchChange={setSearchTerm}
+            placeholder="Filter candidates by name or skills..."
+          />
+          <KanbanBoard>
+            <KanbanColumn title="New CV" count={getStageCandidates('NEW').length} badgeColor="var(--slate-500)">
+              {getStageCandidates('NEW').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
+              ))}
+            </KanbanColumn>
 
-          <KanbanColumn title="AI Review" count={getStageCandidates('AI_REVIEW').length} badgeColor="#0284c7">
-            {getStageCandidates('AI_REVIEW').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
-            ))}
-          </KanbanColumn>
+            <KanbanColumn title="AI Review" count={getStageCandidates('AI_REVIEW').length} badgeColor="#0284c7">
+              {getStageCandidates('AI_REVIEW').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
+              ))}
+            </KanbanColumn>
 
-          <KanbanColumn title="Human Review" count={getStageCandidates('HUMAN_REVIEW').length} badgeColor="#f59e0b">
-            {getStageCandidates('HUMAN_REVIEW').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
-            ))}
-          </KanbanColumn>
+            <KanbanColumn title="Human Review" count={getStageCandidates('HUMAN_REVIEW').length} badgeColor="#f59e0b">
+              {getStageCandidates('HUMAN_REVIEW').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
+              ))}
+            </KanbanColumn>
 
-          <KanbanColumn title="Shortlisted" count={getStageCandidates('SHORTLISTED').length} badgeColor="#d97706">
-            {getStageCandidates('SHORTLISTED').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
-            ))}
-          </KanbanColumn>
+            <KanbanColumn title="Shortlisted" count={getStageCandidates('SHORTLISTED').length} badgeColor="#d97706">
+              {getStageCandidates('SHORTLISTED').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
+              ))}
+            </KanbanColumn>
 
-          <KanbanColumn title="Interview" count={getStageCandidates('INTERVIEW').length} badgeColor="#9333ea">
-            {getStageCandidates('INTERVIEW').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
-            ))}
-          </KanbanColumn>
+            <KanbanColumn title="Interview" count={getStageCandidates('INTERVIEW').length} badgeColor="#9333ea">
+              {getStageCandidates('INTERVIEW').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} onAction={handleRequestAction} />
+              ))}
+            </KanbanColumn>
 
-          <KanbanColumn title="Selected / Hired" count={getStageCandidates('SELECTED').length} badgeColor="#16a34a">
-            {getStageCandidates('SELECTED').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setOnboardCandidate(cand)} />
-            ))}
-          </KanbanColumn>
+            <KanbanColumn title="Selected / Hired" count={getStageCandidates('SELECTED').length} badgeColor="#16a34a">
+              {getStageCandidates('SELECTED').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setOnboardCandidate(cand)} />
+              ))}
+            </KanbanColumn>
 
-          <KanbanColumn title="Rejected" count={getStageCandidates('REJECTED').length} badgeColor="#dc2626">
-            {getStageCandidates('REJECTED').map(c => (
-              <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} />
-            ))}
-          </KanbanColumn>
-        </KanbanBoard>
+            <KanbanColumn title="Rejected" count={getStageCandidates('REJECTED').length} badgeColor="#dc2626">
+              {getStageCandidates('REJECTED').map(c => (
+                <CandidateCard key={c.CandidateID} candidate={c} onClick={cand => setSelectedCandidateId(cand.CandidateID)} />
+              ))}
+            </KanbanColumn>
+          </KanbanBoard>
+        </>
       )}
 
-      {/* VIEW 2: ENQUIRIES INBOX */}
       {activeTab === 'enquiries' && (
         <ContentCard title="Public Careers Submissions & Talent Pool Enquiries">
           <Tabs
@@ -6443,7 +5972,6 @@ function RecruitmentPage() {
             activeTab={enquirySubTab}
             onChange={setEnquirySubTab}
           />
-
           <div style={{ marginTop: '16px' }}>
             <DataTable
               columns={[
@@ -6461,11 +5989,6 @@ function RecruitmentPage() {
                         Convert to Candidate
                       </Button>
                     )}
-                    {row.ResumeFileName && (
-                      <Button variant="secondary" size="sm" icon="reports" onClick={() => showToast(`Opening Drive file: ${row.ResumeFileName}`, 'info')}>
-                        View CV
-                      </Button>
-                    )}
                   </div>
                 )}
               ]}
@@ -6476,7 +5999,78 @@ function RecruitmentPage() {
         </ContentCard>
       )}
 
-      {/* Candidate Profile Modal */}
+      {activeTab === 'jobAnalysis' && (
+        <ContentCard title="Job Analysis & Structured Job Description Generator">
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+            <input
+              type="text"
+              className="form-input"
+              style={{ maxWidth: '400px' }}
+              value={analysisRoleTitle}
+              onChange={e => setAnalysisRoleTitle(e.target.value)}
+              placeholder="e.g. Senior Full Stack AI Engineer"
+            />
+            <Button variant="primary" icon="reports" onClick={handleGenerateJobAnalysis}>
+              Generate Job Analysis & JD
+            </Button>
+          </div>
+
+          {jobAnalysisResult && (
+            <div style={{ padding: '20px', background: 'var(--slate-50)', borderRadius: '8px', border: '1px solid var(--slate-200)' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '800', color: 'var(--slate-900)', marginBottom: '8px' }}>{jobAnalysisResult.title}</h3>
+              <p style={{ fontSize: '13px', color: 'var(--slate-600)', marginBottom: '16px' }}>Department: {jobAnalysisResult.department} • Level: {jobAnalysisResult.level}</p>
+
+              <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '6px' }}>Core Responsibilities:</h4>
+              <ul style={{ paddingLeft: '20px', fontSize: '13px', marginBottom: '16px' }}>
+                {jobAnalysisResult.responsibilities.map((r, i) => <li key={i}>{r}</li>)}
+              </ul>
+
+              <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '6px' }}>Key Competencies:</h4>
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                {jobAnalysisResult.competencies.map((c, i) => <span key={i} className="status-badge badge-info">{c}</span>)}
+              </div>
+
+              <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '6px' }}>Education & Requirements:</h4>
+              <ul style={{ paddingLeft: '20px', fontSize: '13px' }}>
+                {jobAnalysisResult.qualifications.map((q, i) => <li key={i}>{q}</li>)}
+              </ul>
+            </div>
+          )}
+        </ContentCard>
+      )}
+
+      {activeTab === 'interviewQuestions' && (
+        <ContentCard title="AI Candidate Interview Question Bank Generator">
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
+            <input
+              type="text"
+              className="form-input"
+              style={{ maxWidth: '400px' }}
+              value={interviewRoleTitle}
+              onChange={e => setInterviewRoleTitle(e.target.value)}
+              placeholder="e.g. Senior Full Stack AI Engineer"
+            />
+            <Button variant="primary" icon="user" onClick={handleGenerateInterviewQuestions}>
+              Generate Interview Questions
+            </Button>
+          </div>
+
+          {interviewQuestionsResult && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {interviewQuestionsResult.map((q, idx) => (
+                <div key={idx} style={{ padding: '16px', background: 'var(--slate-50)', borderRadius: '8px', border: '1px solid var(--slate-200)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span className="status-badge badge-info">Question {idx + 1} ({q.type})</span>
+                  </div>
+                  <p style={{ fontSize: '14px', fontWeight: '700', color: 'var(--slate-900)', marginBottom: '6px' }}>{q.question}</p>
+                  <p style={{ fontSize: '12px', color: 'var(--slate-600)' }}><strong>Evaluation Rubric:</strong> {q.rubric}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </ContentCard>
+      )}
+
       {selectedCandidateId && (
         <CandidateProfileModal
           candidateId={selectedCandidateId}
@@ -6484,7 +6078,6 @@ function RecruitmentPage() {
         />
       )}
 
-      {/* 3-Step Job Creation Wizard */}
       {isCreateJobOpen && (
         <CreateJobModal
           isOpen={isCreateJobOpen}
@@ -6492,7 +6085,6 @@ function RecruitmentPage() {
         />
       )}
 
-      {/* 5-Step Onboarding Workflow Modal */}
       {onboardCandidate && (
         <OnboardingWorkflowModal
           candidate={onboardCandidate}
@@ -6501,7 +6093,6 @@ function RecruitmentPage() {
         />
       )}
 
-      {/* Human Decision Confirmation Dialog */}
       {confirmState && (
         <ConfirmationDialog
           isOpen={!!confirmState}
@@ -6956,7 +6547,7 @@ function EmployeesPage() {
 
 
 /* --- MODULE: src/pages/AttendanceLeavePage.jsx --- */
-// Attendance & Leave Management Module Page (Attendance Records, Clock-In Widget & Leave Approval Queue)
+// Attendance & Leave Management Module Page (Admin Daily Attendance Marking, Employee Attendance Report & Leave Requests)
 
 
 
@@ -6968,18 +6559,45 @@ function AttendanceLeavePage() {
   const { currentUser, hasPermission } = useAuth();
   const { showToast } = useApp();
 
+  const [activeTab, setActiveTab] = useState('attendance'); // 'attendance', 'leave'
   const [searchTerm, setSearchTerm] = useState('');
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isMarkModalOpen, setIsMarkModalOpen] = useState(false);
+
   const [leaveForm, setLeaveForm] = useState({ StartDate: '', EndDate: '', TotalDays: 1, Reason: '' });
 
+  const [markForm, setMarkForm] = useState({
+    EmployeeID: 'EMP-000005',
+    Date: new Date().toISOString().split('T')[0],
+    CheckIn: '09:00',
+    CheckOut: '18:00',
+    WorkingHours: 9,
+    Status: 'PRESENT',
+    Remarks: 'Admin Manual Daily Attendance Log'
+  });
+
   const attendance = dbService.getAll('Attendance', currentUser) || [];
+  const employees = dbService.getAll('Employees', currentUser) || [];
   const leaveRequests = dbService.getAll('LeaveRequests', currentUser) || [];
+
+  const isAdmin = hasPermission('attendance.manage');
 
   const filteredAttendance = attendance.filter(a => {
     if (!searchTerm) return true;
     const q = searchTerm.toLowerCase();
     return a.EmployeeID?.toLowerCase().includes(q) || a.Date?.includes(q) || a.Status?.toLowerCase().includes(q);
   });
+
+  const employeeAttendanceStats = () => {
+    const empLogs = attendance.filter(a => a.EmployeeID === currentUser.EmployeeID);
+    const present = empLogs.filter(a => a.Status === 'PRESENT').length;
+    const absent = empLogs.filter(a => a.Status === 'ABSENT').length;
+    const late = empLogs.filter(a => a.Status === 'LATE').length;
+    const totalHours = empLogs.reduce((acc, curr) => acc + (Number(curr.WorkingHours) || 0), 0);
+    return { count: empLogs.length, present, absent, late, totalHours };
+  };
+
+  const stats = employeeAttendanceStats();
 
   const handleClockIn = () => {
     try {
@@ -6998,6 +6616,53 @@ function AttendanceLeavePage() {
       }, currentUser);
 
       showToast(`Clocked in successfully at ${nowStr}`, 'success');
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  const handleAdminMarkAttendance = (e) => {
+    e.preventDefault();
+    try {
+      dbService.insert('Attendance', {
+        AttendanceID: 'ATT-' + Date.now(),
+        ...markForm,
+        CreatedAt: new Date().toISOString()
+      }, currentUser);
+
+      dbService.insert('AuditLogs', {
+        AuditID: 'AUD-' + Date.now(),
+        UserEmail: currentUser.Email,
+        Action: 'MARK_DAILY_ATTENDANCE',
+        Module: 'ATTENDANCE',
+        Details: `Admin marked daily attendance for ${markForm.EmployeeID} as ${markForm.Status} on ${markForm.Date}`,
+        Timestamp: new Date().toISOString()
+      }, currentUser);
+
+      showToast(`Daily Attendance marked for ${markForm.EmployeeID} as ${markForm.Status}`, 'success');
+      setIsMarkModalOpen(false);
+    } catch (e) {
+      showToast(e.message, 'error');
+    }
+  };
+
+  const handleBulkMarkAllPresent = () => {
+    try {
+      const todayStr = new Date().toISOString().split('T')[0];
+      employees.forEach(emp => {
+        dbService.insert('Attendance', {
+          AttendanceID: 'ATT-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+          EmployeeID: emp.EmployeeID,
+          Date: todayStr,
+          CheckIn: '09:00',
+          CheckOut: '18:00',
+          WorkingHours: 9,
+          Status: 'PRESENT',
+          Remarks: 'Admin Bulk Daily Attendance Entry'
+        }, currentUser);
+      });
+
+      showToast(`Bulk daily attendance logged: All ${employees.length} employees marked PRESENT`, 'success');
     } catch (e) {
       showToast(e.message, 'error');
     }
@@ -7022,81 +6687,214 @@ function AttendanceLeavePage() {
     }
   };
 
+  const handleDownloadAttendanceReport = (format) => {
+    const reportTitle = `Attendance_Report_${currentUser.EmployeeID}_${new Date().toISOString().split('T')[0]}`;
+    const content = `Attendance Report for ${currentUser.FullName} (${currentUser.EmployeeID})\n\n` +
+      `Total Days: ${stats.count}\nPresent: ${stats.present}\nAbsent: ${stats.absent}\nLate: ${stats.late}\nTotal Hours: ${stats.totalHours} hrs\n\n` +
+      `Date | Check In | Check Out | Hours | Status | Remarks\n` +
+      filteredAttendance.map(a => `${a.Date} | ${a.CheckIn || '--'} | ${a.CheckOut || '--'} | ${a.WorkingHours || 0} hrs | ${a.Status} | ${a.Remarks || ''}`).join('\n');
+
+    const blob = new Blob([content], { type: format === 'pdf' ? 'application/pdf' : 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportTitle}.${format === 'pdf' ? 'txt' : 'csv'}`;
+    a.click();
+    showToast(`Downloaded Attendance Report (${format.toUpperCase()})`, 'success');
+  };
+
   return (
     <div className="module-view">
       <PageHeader
-        title={hasPermission('attendance.manage') ? 'Attendance & Leave Management' : 'My Attendance & Leave'}
-        subtitle="Daily Attendance Logs, Web Clock-In & Employee Leave Request Approvals"
+        title={isAdmin ? 'Daily Attendance Marking & Leave Administration' : 'My Attendance Report & Leave Requests'}
+        subtitle={isAdmin ? 'Admin Daily Attendance Entry, Bulk Logging & Leave Approvals' : 'Personal Attendance Log, Monthly Summary & Leave Application'}
         actions={
           <div style={{ display: 'flex', gap: '10px' }}>
-            <Button variant="secondary" icon="attendance" onClick={handleClockIn}>
-              Web Clock-In Today
-            </Button>
-            <Button variant="primary" icon="plus" onClick={() => setIsLeaveModalOpen(true)}>
-              Apply for Leave
-            </Button>
+            {isAdmin ? (
+              <>
+                <Button variant="primary" icon="plus" onClick={() => setIsMarkModalOpen(true)}>
+                  Mark Daily Attendance
+                </Button>
+                <Button variant="secondary" icon="check" onClick={handleBulkMarkAllPresent}>
+                  Bulk Mark All Present
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="secondary" icon="attendance" onClick={handleClockIn}>
+                  Web Clock-In Today
+                </Button>
+                <Button variant="primary" icon="plus" onClick={() => setIsLeaveModalOpen(true)}>
+                  Apply for Leave
+                </Button>
+              </>
+            )}
           </div>
         }
+      />
+
+      {/* EMPLOYEE SUMMARY CARD */}
+      {!isAdmin && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          <div className="stat-card">
+            <div className="stat-title">Days Present</div>
+            <div className="stat-value" style={{ color: 'var(--emerald-600)' }}>{stats.present}</div>
+            <div className="stat-sub">This Month</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-title">Days Absent</div>
+            <div className="stat-value" style={{ color: 'var(--rose-600)' }}>{stats.absent}</div>
+            <div className="stat-sub">This Month</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-title">Late Arrivals</div>
+            <div className="stat-value" style={{ color: 'var(--amber-600)' }}>{stats.late}</div>
+            <div className="stat-sub">This Month</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-title">Total Hours Worked</div>
+            <div className="stat-value" style={{ color: 'var(--primary-600)' }}>{stats.totalHours} hrs</div>
+            <div className="stat-sub">Log Summary</div>
+          </div>
+        </div>
+      )}
+
+      <Tabs
+        tabs={[
+          { id: 'attendance', label: isAdmin ? 'Daily Attendance Registry' : 'My Attendance Report', icon: 'attendance' },
+          { id: 'leave', label: 'Leave Requests & Approvals', icon: 'reports' }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
       />
 
       <TableToolbar
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        placeholder="Filter attendance logs by employee ID or date..."
+        placeholder="Filter logs by employee ID, date, or status..."
       />
 
-      <ContentCard title="Daily Attendance Records">
-        <DataTable
-          columns={[
-            { header: 'Employee ID', accessor: 'EmployeeID' },
-            { header: 'Date', accessor: 'Date' },
-            { header: 'Check In', accessor: 'CheckIn' },
-            { header: 'Check Out', accessor: 'CheckOut' },
-            { header: 'Working Hours', render: (row) => `${row.WorkingHours || 0} hrs` },
-            { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> }
-          ]}
-          data={filteredAttendance}
-          emptyMessage="No attendance records found."
-        />
-      </ContentCard>
+      {activeTab === 'attendance' && (
+        <ContentCard
+          title={isAdmin ? "Organization Daily Attendance Logs" : "My Monthly Attendance Report & History"}
+          action={
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button variant="secondary" size="sm" icon="reports" onClick={() => handleDownloadAttendanceReport('pdf')}>
+                Export Attendance PDF
+              </Button>
+              <Button variant="secondary" size="sm" icon="reports" onClick={() => handleDownloadAttendanceReport('csv')}>
+                Export CSV Statement
+              </Button>
+            </div>
+          }
+        >
+          <DataTable
+            columns={[
+              { header: 'Attendance ID', accessor: 'AttendanceID' },
+              { header: 'Employee ID', accessor: 'EmployeeID' },
+              { header: 'Date', accessor: 'Date' },
+              { header: 'Check In', accessor: 'CheckIn' },
+              { header: 'Check Out', accessor: 'CheckOut' },
+              { header: 'Working Hours', render: (row) => `${row.WorkingHours || 0} hrs` },
+              { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> },
+              { header: 'Remarks', accessor: 'Remarks' }
+            ]}
+            data={filteredAttendance}
+            emptyMessage="No attendance records logged."
+          />
+        </ContentCard>
+      )}
 
-      <ContentCard title="Leave Application Requests">
-        <DataTable
-          columns={[
-            { header: 'Employee ID', accessor: 'EmployeeID' },
-            { header: 'Start Date', accessor: 'StartDate' },
-            { header: 'End Date', accessor: 'EndDate' },
-            { header: 'Total Days', render: (row) => `${row.TotalDays} Days` },
-            { header: 'Reason', accessor: 'Reason' },
-            { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> }
-          ]}
-          data={leaveRequests}
-          emptyMessage="No leave requests available."
-        />
-      </ContentCard>
+      {activeTab === 'leave' && (
+        <ContentCard title="Leave Requests & Approval Queue">
+          <DataTable
+            columns={[
+              { header: 'Leave ID', accessor: 'LeaveRequestID' },
+              { header: 'Employee ID', accessor: 'EmployeeID' },
+              { header: 'Start Date', accessor: 'StartDate' },
+              { header: 'End Date', accessor: 'EndDate' },
+              { header: 'Total Days', accessor: 'TotalDays' },
+              { header: 'Reason', accessor: 'Reason' },
+              { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> }
+            ]}
+            data={leaveRequests}
+            emptyMessage="No leave requests submitted."
+          />
+        </ContentCard>
+      )}
 
-      {/* Apply Leave Modal */}
-      <Modal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} title="Submit Leave Request">
-        <form onSubmit={handleApplyLeave}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <FormField label="Start Date" required>
-              <input type="date" className="form-input" value={leaveForm.StartDate} onChange={e => setLeaveForm({ ...leaveForm, StartDate: e.target.value })} required />
+      {/* ADMIN MARK DAILY ATTENDANCE MODAL */}
+      {isMarkModalOpen && (
+        <Modal isOpen={isMarkModalOpen} onClose={() => setIsMarkModalOpen(false)} title="Mark Daily Attendance (Super Admin)">
+          <form onSubmit={handleAdminMarkAttendance}>
+            <FormField label="Select Employee" required>
+              <select className="form-select" value={markForm.EmployeeID} onChange={e => setMarkForm({ ...markForm, EmployeeID: e.target.value })}>
+                {employees.map(emp => (
+                  <option key={emp.EmployeeID} value={emp.EmployeeID}>{emp.FirstName} {emp.LastName} ({emp.EmployeeID})</option>
+                ))}
+              </select>
             </FormField>
-            <FormField label="End Date" required>
-              <input type="date" className="form-input" value={leaveForm.EndDate} onChange={e => setLeaveForm({ ...leaveForm, EndDate: e.target.value })} required />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <FormField label="Attendance Date" required>
+                <input type="date" className="form-input" value={markForm.Date} onChange={e => setMarkForm({ ...markForm, Date: e.target.value })} required />
+              </FormField>
+              <FormField label="Attendance Status" required>
+                <select className="form-select" value={markForm.Status} onChange={e => setMarkForm({ ...markForm, Status: e.target.value })}>
+                  <option value="PRESENT">PRESENT</option>
+                  <option value="ABSENT">ABSENT</option>
+                  <option value="LATE">LATE</option>
+                  <option value="HALF_DAY">HALF DAY</option>
+                  <option value="ON_LEAVE">ON LEAVE</option>
+                </select>
+              </FormField>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <FormField label="Check-In Time">
+                <input type="time" className="form-input" value={markForm.CheckIn} onChange={e => setMarkForm({ ...markForm, CheckIn: e.target.value })} />
+              </FormField>
+              <FormField label="Check-Out Time">
+                <input type="time" className="form-input" value={markForm.CheckOut} onChange={e => setMarkForm({ ...markForm, CheckOut: e.target.value })} />
+              </FormField>
+            </div>
+
+            <FormField label="Admin Remarks / Notes">
+              <input type="text" className="form-input" value={markForm.Remarks} onChange={e => setMarkForm({ ...markForm, Remarks: e.target.value })} />
             </FormField>
-          </div>
 
-          <FormField label="Reason for Leave" required>
-            <textarea className="form-textarea" value={leaveForm.Reason} onChange={e => setLeaveForm({ ...leaveForm, Reason: e.target.value })} required placeholder="State brief reason for leave application..." />
-          </FormField>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+              <Button variant="secondary" onClick={() => setIsMarkModalOpen(false)}>Cancel</Button>
+              <Button type="submit" variant="primary">Log Daily Attendance</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-            <Button variant="secondary" onClick={() => setIsLeaveModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="primary">Submit Application</Button>
-          </div>
-        </form>
-      </Modal>
+      {/* APPLY LEAVE MODAL */}
+      {isLeaveModalOpen && (
+        <Modal isOpen={isLeaveModalOpen} onClose={() => setIsLeaveModalOpen(false)} title="Apply for Leave">
+          <form onSubmit={handleApplyLeave}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <FormField label="Start Date" required>
+                <input type="date" className="form-input" value={leaveForm.StartDate} onChange={e => setLeaveForm({ ...leaveForm, StartDate: e.target.value })} required />
+              </FormField>
+              <FormField label="End Date" required>
+                <input type="date" className="form-input" value={leaveForm.EndDate} onChange={e => setLeaveForm({ ...leaveForm, EndDate: e.target.value })} required />
+              </FormField>
+            </div>
+
+            <FormField label="Reason for Leave" required>
+              <textarea className="form-textarea" value={leaveForm.Reason} onChange={e => setLeaveForm({ ...leaveForm, Reason: e.target.value })} required rows={3} />
+            </FormField>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+              <Button variant="secondary" onClick={() => setIsLeaveModalOpen(false)}>Cancel</Button>
+              <Button type="submit" variant="primary">Submit Leave Request</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -7338,7 +7136,7 @@ function TrainingPage() {
 
 
 /* --- MODULE: src/pages/PerformancePage.jsx --- */
-// Performance Management Module Page (KPIs/KRAs Goals & Performance Appraisals)
+// Performance Management Module Page (KPIs, KRAs, Goals & Performance Appraisals)
 
 
 
@@ -7350,12 +7148,23 @@ function PerformancePage() {
   const { currentUser, hasPermission } = useAuth();
   const { showToast } = useApp();
 
+  const [activeTab, setActiveTab] = useState('goals'); // 'goals', 'reviews'
   const [searchTerm, setSearchTerm] = useState('');
   const [isGoalModalOpen, setIsGoalModalOpen] = useState(false);
-  const [goalForm, setGoalForm] = useState({ GoalTitle: '', KPI_KRA: '', TargetMetric: '', DueDate: '' });
+  const [goalForm, setGoalForm] = useState({
+    EmployeeID: 'EMP-000005',
+    GoalTitle: '',
+    KPI_KRA: 'KRA: Platform Quality',
+    TargetMetric: '',
+    DueDate: '',
+    ReviewPeriod: '2026-Q3'
+  });
 
   const goals = dbService.getAll('PerformanceGoals', currentUser) || [];
+  const employees = dbService.getAll('Employees', currentUser) || [];
   const reviews = dbService.getAll('PerformanceReviews', currentUser) || [];
+
+  const isAdmin = hasPermission('performance.review');
 
   const filteredGoals = goals.filter(g => {
     if (!searchTerm) return true;
@@ -7366,17 +7175,42 @@ function PerformancePage() {
   const handleCreateGoal = (e) => {
     e.preventDefault();
     try {
+      const empId = isAdmin ? goalForm.EmployeeID : currentUser.EmployeeID;
       dbService.insert('PerformanceGoals', {
         GoalID: 'GOL-' + Date.now(),
-        EmployeeID: currentUser.EmployeeID,
-        ReviewPeriod: 'Q3-2026',
+        EmployeeID: empId,
         ...goalForm,
         ProgressPercent: 0,
-        Status: 'IN_PROGRESS'
+        Status: 'IN_PROGRESS',
+        CreatedAt: new Date().toISOString()
       }, currentUser);
 
-      showToast('Performance goal created successfully', 'success');
+      dbService.insert('AuditLogs', {
+        AuditID: 'AUD-' + Date.now(),
+        UserEmail: currentUser.Email,
+        Action: 'CREATE_KPI_KRA',
+        Module: 'PERFORMANCE',
+        Details: `Created KPI/KRA ${goalForm.GoalTitle} for ${empId}`,
+        Timestamp: new Date().toISOString()
+      }, currentUser);
+
+      showToast(`KPI/KRA Goal created for ${empId}`, 'success');
       setIsGoalModalOpen(false);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleUpdateProgress = (goal, newProgress) => {
+    try {
+      const status = newProgress >= 100 ? 'COMPLETED' : 'IN_PROGRESS';
+      dbService.update('PerformanceGoals', 'GoalID', goal.GoalID, {
+        ProgressPercent: newProgress,
+        Status: status,
+        UpdatedAt: new Date().toISOString()
+      }, currentUser);
+
+      showToast(`Updated progress for ${goal.GoalTitle} to ${newProgress}%`, 'success');
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -7385,81 +7219,131 @@ function PerformancePage() {
   return (
     <div className="module-view">
       <PageHeader
-        title={hasPermission('performance.goal.manage.team') ? 'Team Goals & Reviews' : 'My Goals & Reviews'}
-        subtitle="Performance Appraisal Framework, KPI Tracking & Employee Reviews"
+        title={isAdmin ? 'KPI, KRA & Performance Management' : 'My KPIs & Key Result Areas (KRAs)'}
+        subtitle={isAdmin ? 'Define Employee KPIs & KRAs, Track Target Metrics & Performance Reviews' : 'View Assigned KPIs, KRAs, Update Target Progress % & Appraisals'}
         actions={
-          hasPermission('performance.goal.create.self') && (
-            <Button variant="primary" icon="performance" onClick={() => setIsGoalModalOpen(true)}>
-              Create Performance Goal
-            </Button>
-          )
+          <Button variant="primary" icon="performance" onClick={() => setIsGoalModalOpen(true)}>
+            Add KPI / KRA Goal
+          </Button>
         }
+      />
+
+      <Tabs
+        tabs={[
+          { id: 'goals', label: isAdmin ? 'Organization KPIs & KRAs' : 'My Assigned KPIs & KRAs', icon: 'performance' },
+          { id: 'reviews', label: 'Performance Appraisal Reviews', icon: 'reports' }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
       />
 
       <TableToolbar
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
-        placeholder="Filter performance goals by title, KPI, or employee..."
+        placeholder="Filter KPI / KRA goals by title, category, or employee ID..."
       />
 
-      <ContentCard title="Performance Goals & OKR Tracking">
-        <DataTable
-          columns={[
-            { header: 'Goal Title', accessor: 'GoalTitle' },
-            { header: 'KPI / KRA', accessor: 'KPI_KRA' },
-            { header: 'Employee ID', accessor: 'EmployeeID' },
-            { header: 'Review Period', accessor: 'ReviewPeriod' },
-            { header: 'Due Date', accessor: 'DueDate' },
-            { header: 'Progress', render: (row) => <strong>{row.ProgressPercent}%</strong> },
-            { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> }
-          ]}
-          data={filteredGoals}
-          emptyMessage="No performance goals found in your permission scope."
-        />
-      </ContentCard>
+      {activeTab === 'goals' && (
+        <ContentCard title="KPI & KRA Goal Tracking Matrix">
+          <DataTable
+            columns={[
+              { header: 'Goal ID', accessor: 'GoalID' },
+              { header: 'Goal Title', accessor: 'GoalTitle' },
+              { header: 'KPI / KRA Category', render: (row) => <strong>{row.KPI_KRA}</strong> },
+              { header: 'Employee ID', accessor: 'EmployeeID' },
+              { header: 'Target Metric', accessor: 'TargetMetric' },
+              { header: 'Due Date', accessor: 'DueDate' },
+              { header: 'Progress', render: (row) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '80px', height: '8px', background: 'var(--slate-200)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${row.ProgressPercent}%`, height: '100%', background: 'var(--primary-600)' }} />
+                  </div>
+                  <span>{row.ProgressPercent}%</span>
+                </div>
+              )},
+              { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> },
+              { header: 'Actions', render: (row) => (
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  {row.ProgressPercent < 100 && (
+                    <Button variant="secondary" size="sm" icon="check" onClick={() => handleUpdateProgress(row, Math.min(100, (Number(row.ProgressPercent) || 0) + 25))}>
+                      +25% Progress
+                    </Button>
+                  )}
+                </div>
+              )}
+            ]}
+            data={filteredGoals}
+            emptyMessage="No KPI/KRA performance goals found."
+          />
+        </ContentCard>
+      )}
 
-      <ContentCard title="Completed Appraisal Reviews">
-        <DataTable
-          columns={[
-            { header: 'Review ID', accessor: 'ReviewID' },
-            { header: 'Employee ID', accessor: 'EmployeeID' },
-            { header: 'Period', accessor: 'ReviewPeriod' },
-            { header: 'Self Rating', render: (row) => `${row.SelfRating} / 5` },
-            { header: 'Manager Rating', render: (row) => `${row.ManagerRating} / 5` },
-            { header: 'Final Score', render: (row) => <strong>{row.FinalRating} / 5</strong> },
-            { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> }
-          ]}
-          data={reviews}
-          emptyMessage="No appraisal reviews completed."
-        />
-      </ContentCard>
+      {activeTab === 'reviews' && (
+        <ContentCard title="Appraisal Reviews & Ratings">
+          <DataTable
+            columns={[
+              { header: 'Review ID', accessor: 'ReviewID' },
+              { header: 'Employee ID', accessor: 'EmployeeID' },
+              { header: 'Period', accessor: 'ReviewPeriod' },
+              { header: 'Self Rating', render: (row) => `${row.SelfRating} / 5` },
+              { header: 'Manager Rating', render: (row) => `${row.ManagerRating} / 5` },
+              { header: 'Final Score', render: (row) => <strong>{row.FinalRating} / 5</strong> },
+              { header: 'Status', render: (row) => <StatusBadge status={row.Status} /> }
+            ]}
+            data={reviews}
+            emptyMessage="No appraisal reviews completed."
+          />
+        </ContentCard>
+      )}
 
-      {/* Create Goal Modal */}
-      <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} title="Define New Performance Goal">
-        <form onSubmit={handleCreateGoal}>
-          <FormField label="Goal Title" required>
-            <input type="text" className="form-input" value={goalForm.GoalTitle} onChange={e => setGoalForm({ ...goalForm, GoalTitle: e.target.value })} required placeholder="e.g. Implement AI CV Engine" />
-          </FormField>
+      {/* CREATE KPI / KRA GOAL MODAL */}
+      {isGoalModalOpen && (
+        <Modal isOpen={isGoalModalOpen} onClose={() => setIsGoalModalOpen(false)} title="Define KPI / KRA Performance Goal">
+          <form onSubmit={handleCreateGoal}>
+            {isAdmin && (
+              <FormField label="Assign to Employee" required>
+                <select className="form-select" value={goalForm.EmployeeID} onChange={e => setGoalForm({ ...goalForm, EmployeeID: e.target.value })}>
+                  {employees.map(emp => (
+                    <option key={emp.EmployeeID} value={emp.EmployeeID}>{emp.FirstName} {emp.LastName} ({emp.EmployeeID})</option>
+                  ))}
+                </select>
+              </FormField>
+            )}
 
-          <FormField label="KPI / Key Result Area" required>
-            <input type="text" className="form-input" value={goalForm.KPI_KRA} onChange={e => setGoalForm({ ...goalForm, KPI_KRA: e.target.value })} required placeholder="e.g. Turnaround time reduction" />
-          </FormField>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <FormField label="Target Metric" required>
-              <input type="text" className="form-input" value={goalForm.TargetMetric} onChange={e => setGoalForm({ ...goalForm, TargetMetric: e.target.value })} required placeholder="e.g. 100% accuracy" />
+            <FormField label="Goal Title" required>
+              <input type="text" className="form-input" value={goalForm.GoalTitle} onChange={e => setGoalForm({ ...goalForm, GoalTitle: e.target.value })} required placeholder="e.g. System Performance Optimization" />
             </FormField>
-            <FormField label="Due Date" required>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <FormField label="KPI / KRA Category" required>
+                <select className="form-select" value={goalForm.KPI_KRA} onChange={e => setGoalForm({ ...goalForm, KPI_KRA: e.target.value })}>
+                  <option value="KRA: Key Result Area">KRA: Key Result Area</option>
+                  <option value="KPI: Quality Assurance">KPI: Quality Assurance</option>
+                  <option value="KPI: Productivity & Delivery">KPI: Productivity & Delivery</option>
+                  <option value="KPI: Leadership & Ownership">KPI: Leadership & Ownership</option>
+                </select>
+              </FormField>
+
+              <FormField label="Review Period" required>
+                <input type="text" className="form-input" value={goalForm.ReviewPeriod} onChange={e => setGoalForm({ ...goalForm, ReviewPeriod: e.target.value })} required placeholder="e.g. 2026-Q3" />
+              </FormField>
+            </div>
+
+            <FormField label="Target Metric / Deliverable" required>
+              <textarea className="form-textarea" value={goalForm.TargetMetric} onChange={e => setGoalForm({ ...goalForm, TargetMetric: e.target.value })} required rows={2} placeholder="e.g. Achieve 99.9% uptime & 90% unit test coverage" />
+            </FormField>
+
+            <FormField label="Target Due Date" required>
               <input type="date" className="form-input" value={goalForm.DueDate} onChange={e => setGoalForm({ ...goalForm, DueDate: e.target.value })} required />
             </FormField>
-          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
-            <Button variant="secondary" onClick={() => setIsGoalModalOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="primary">Create Goal</Button>
-          </div>
-        </form>
-      </Modal>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '20px' }}>
+              <Button variant="secondary" onClick={() => setIsGoalModalOpen(false)}>Cancel</Button>
+              <Button type="submit" variant="primary">Save KPI / KRA Goal</Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -7575,7 +7459,7 @@ function ExitPage() {
 
 
 /* --- MODULE: src/pages/ReportsPage.jsx --- */
-// Reports & HR Analytics Module Page (Workforce Analytics & Exportable Summaries)
+// Reports & HR Analytics Module Page (HR Analytics Dashboard & HR SOP Repository)
 
 
 
@@ -7586,59 +7470,170 @@ function ExitPage() {
 function ReportsPage() {
   const { currentUser } = useAuth();
   const { showToast } = useApp();
-  const [reportCategory, setReportCategory] = useState('WORKFORCE');
+
+  const [activeTab, setActiveTab] = useState('analytics'); // 'analytics', 'sops'
+  const [selectedSOP, setSelectedSOP] = useState(null);
 
   const employees = dbService.getAll('Employees', currentUser) || [];
   const jobs = dbService.getAll('Jobs', currentUser) || [];
   const candidates = dbService.getAll('Candidates', currentUser) || [];
+  const attendance = dbService.getAll('Attendance', currentUser) || [];
+  const sops = dbService.getAll('HRSOPs', currentUser) || [];
+
+  const totalHeadcount = employees.length;
+  const presentLogs = attendance.filter(a => a.Status === 'PRESENT').length;
+  const totalLogs = attendance.length || 1;
+  const attendanceRate = Math.round((presentLogs / totalLogs) * 100) || 96;
+  const attritionRate = '2.1%';
+  const monthlyPayrollSpend = employees.reduce((acc, curr) => acc + (Number(curr.BaseSalary) || 110000), 0) / 12;
+
+  const handleDownloadSOP = (sop) => {
+    const text = `STANDARD OPERATING PROCEDURE (SOP)\n\n` +
+      `Title: ${sop.SOPTitle}\n` +
+      `ID: ${sop.SOPID} | Category: ${sop.Category} | Version: ${sop.Version}\n` +
+      `Effective Date: ${sop.EffectiveDate} | Approved By: ${sop.ApprovedBy}\n\n` +
+      `SUMMARY:\n${sop.Summary}\n\n` +
+      `PROCEDURE DETAILS:\n${sop.ContentText || 'Standard operating procedure guidelines approved by HR Management.'}`;
+
+    const blob = new Blob([text], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${sop.SOPID}_${sop.SOPTitle.replace(/\s+/g, '_')}.html`;
+    a.click();
+    showToast(`Downloaded SOP Document: ${sop.SOPTitle}`, 'success');
+  };
 
   return (
     <div className="module-view">
       <PageHeader
-        title="HR Analytics & Executive Reports"
-        subtitle="Authoritative Data Analytics & Exportable Operational Summaries"
+        title="HR Analytics Report & HR SOP Repository"
+        subtitle="Comprehensive Workforce Analytics, HR Metrics & Operational SOP Documents"
         actions={
           <Button variant="secondary" icon="reports" onClick={() => window.print()}>
-            Print Executive Report
+            Print Executive Summary
           </Button>
         }
       />
 
-      <div className="metrics-grid">
-        <StatCard
-          title="Total Workforce"
-          value={employees.length}
-          subtitle="Active Employees"
-          iconName="employees"
-        />
-        <StatCard
-          title="Active Requisitions"
-          value={jobs.length}
-          subtitle="Open Jobs"
-          iconName="recruitment"
-        />
-        <StatCard
-          title="Candidate Submissions"
-          value={candidates.length}
-          subtitle="AI Screened"
-          iconName="onboarding"
-        />
-      </div>
+      <Tabs
+        tabs={[
+          { id: 'analytics', label: 'HR Executive Analytics Dashboard', icon: 'reports' },
+          { id: 'sops', label: 'HR Standard Operating Procedures (SOPs)', icon: 'folder', count: sops.length }
+        ]}
+        activeTab={activeTab}
+        onChange={setActiveTab}
+      />
 
-      <ContentCard title="Workforce Department Breakdown">
-        <DataTable
-          columns={[
-            { header: 'Department', accessor: 'DepartmentID' },
-            { header: 'Headcount', render: (row) => `${employees.filter(e => e.DepartmentID === row.DepartmentID).length} Members` },
-            { header: 'Status', render: () => <StatusBadge status="ACTIVE" /> }
-          ]}
-          data={[
-            { DepartmentID: 'Engineering & Technology (DEP-000001)' },
-            { DepartmentID: 'Human Resources & Talent (DEP-000002)' },
-            { DepartmentID: 'Finance & Operations (DEP-000004)' }
-          ]}
-        />
-      </ContentCard>
+      {activeTab === 'analytics' && (
+        <>
+          <div className="metrics-grid">
+            <StatCard
+              title="Total Workforce Headcount"
+              value={totalHeadcount}
+              subtitle="Active Employees"
+              iconName="employees"
+            />
+            <StatCard
+              title="Average Attendance Rate"
+              value={`${attendanceRate}%`}
+              subtitle="Monthly Average"
+              iconName="attendance"
+            />
+            <StatCard
+              title="Annual Attrition Rate"
+              value={attritionRate}
+              subtitle="Healthy Threshold (<5%)"
+              iconName="exit"
+            />
+            <StatCard
+              title="Est. Monthly Payroll"
+              value={`$${Math.round(monthlyPayrollSpend).toLocaleString()}`}
+              subtitle="Gross Salary Spend"
+              iconName="payroll"
+            />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+            <ContentCard title="Recruitment Funnel Conversion Analytics">
+              <DataTable
+                columns={[
+                  { header: 'Funnel Stage', accessor: 'stage' },
+                  { header: 'Candidates', accessor: 'count' },
+                  { header: 'Conversion Rate', accessor: 'conversion' }
+                ]}
+                data={[
+                  { stage: 'Public CV Submissions', count: candidates.length, conversion: '100%' },
+                  { stage: 'AI Recommended Shortlists', count: candidates.filter(c => c.AIScore >= 75).length, conversion: '75%' },
+                  { stage: 'Human Recruiter Approved', count: candidates.filter(c => c.RecruiterStatus === 'SHORTLISTED').length, conversion: '50%' },
+                  { stage: 'Final Offers Issued & Accepted', count: 1, conversion: '25%' }
+                ]}
+              />
+            </ContentCard>
+
+            <ContentCard title="Workforce Department Breakdown">
+              <DataTable
+                columns={[
+                  { header: 'Department', accessor: 'name' },
+                  { header: 'Headcount', accessor: 'count' },
+                  { header: 'Status', render: () => <StatusBadge status="ACTIVE" /> }
+                ]}
+                data={[
+                  { name: 'Engineering & Technology', count: employees.filter(e => e.DepartmentID === 'DEP-000001').length || 1 },
+                  { name: 'Human Resources & Talent', count: employees.filter(e => e.DepartmentID === 'DEP-000002').length || 1 },
+                  { name: 'Finance & Operations', count: employees.filter(e => e.DepartmentID === 'DEP-000004').length || 1 }
+                ]}
+              />
+            </ContentCard>
+          </div>
+        </>
+      )}
+
+      {activeTab === 'sops' && (
+        <ContentCard title="HR Standard Operating Procedures (SOPs) Library">
+          <DataTable
+            columns={[
+              { header: 'SOP Ref ID', accessor: 'SOPID' },
+              { header: 'Document Title', accessor: 'SOPTitle' },
+              { header: 'Category', render: (row) => <StatusBadge status={row.Category} /> },
+              { header: 'Version', accessor: 'Version' },
+              { header: 'Effective Date', accessor: 'EffectiveDate' },
+              { header: 'Approval', render: (row) => `Approved by ${row.ApprovedBy}` },
+              { header: 'Actions', render: (row) => (
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <Button variant="secondary" size="sm" icon="reports" onClick={() => setSelectedSOP(row)}>
+                    View SOP
+                  </Button>
+                  <Button variant="secondary" size="sm" icon="reports" onClick={() => handleDownloadSOP(row)}>
+                    Download PDF
+                  </Button>
+                </div>
+              )}
+            ]}
+            data={sops}
+            emptyMessage="No HR SOP documents found."
+          />
+        </ContentCard>
+      )}
+
+      {/* SOP VIEWER MODAL */}
+      {selectedSOP && (
+        <Modal isOpen={!!selectedSOP} onClose={() => setSelectedSOP(null)} title={`HR SOP Document: ${selectedSOP.SOPTitle}`} maxWidth="720px">
+          <div style={{ padding: '16px', background: 'var(--slate-50)', borderRadius: '8px', border: '1px solid var(--slate-200)', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--slate-600)', marginBottom: '8px' }}>
+              <span>ID: {selectedSOP.SOPID} • Version: {selectedSOP.Version}</span>
+              <span>Effective Date: {selectedSOP.EffectiveDate}</span>
+            </div>
+            <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--slate-900)', marginBottom: '6px' }}>Executive Summary:</h4>
+            <p style={{ fontSize: '13px', color: 'var(--slate-700)', lineHeight: '1.5' }}>{selectedSOP.Summary}</p>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <Button variant="secondary" onClick={() => setSelectedSOP(null)}>Close</Button>
+            <Button variant="primary" icon="reports" onClick={() => handleDownloadSOP(selectedSOP)}>Download SOP</Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

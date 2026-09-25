@@ -2534,9 +2534,13 @@ function AppProvider({ children }) {
     setSyncStatus(dbService.getSyncStatus());
   };
 
+  const hideToast = () => {
+    setToast(null);
+  };
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => setToast(null), 3500);
   };
 
   // 1. Boot fetch authoritative Google Sheets data on application load
@@ -2589,6 +2593,7 @@ function AppProvider({ children }) {
       notifications: Array.isArray(notifications) ? notifications : [],
       toast,
       showToast,
+      hideToast,
       refreshKey,
       triggerRefresh,
       syncStatus,
@@ -2610,6 +2615,7 @@ function useApp() {
       notifications: [],
       toast: null,
       showToast: () => {},
+      hideToast: () => {},
       refreshKey: 0,
       triggerRefresh: () => {},
       syncStatus: {
@@ -3447,7 +3453,7 @@ function Topbar({ onToggleMobileSidebar }) {
 
 function AppShell({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { toast } = useApp();
+  const { toast, hideToast } = useApp();
 
   return (
     <div className="app-shell">
@@ -3470,12 +3476,22 @@ function AppShell({ children }) {
         </main>
       </div>
 
-      {/* Toast Notification Container */}
+      {/* Compact Floating Toast Notification */}
       {toast && (
         <div className="toast-container" role="status" aria-live="polite">
           <div className={`toast toast-${toast.type || 'success'}`}>
-            <span style={{ fontSize: '16px' }}>{toast.type === 'error' ? '⚠️' : toast.type === 'info' ? 'ℹ️' : '✓'}</span>
-            <span style={{ flex: 1 }}>{toast.message}</span>
+            <span className="toast-icon">
+              {toast.type === 'error' ? '!' : toast.type === 'info' ? 'i' : '✓'}
+            </span>
+            <span className="toast-text">{toast.message}</span>
+            <button
+              type="button"
+              className="toast-close"
+              onClick={hideToast}
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

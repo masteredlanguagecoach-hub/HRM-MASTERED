@@ -482,6 +482,10 @@ body {
 .account-avatar {
   width: 34px;
   height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  max-width: 34px;
+  max-height: 34px;
   border-radius: 50%;
   background-color: var(--primary-600);
   color: #ffffff;
@@ -490,6 +494,8 @@ body {
   justify-content: center;
   font-weight: 700;
   font-size: 13px;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 
 .account-info {
@@ -932,39 +938,40 @@ body {
   border-radius: var(--radius-full);
 }
 
-/* --- 12. FLOATING POPUP TOAST NOTIFICATIONS --- */
+/* --- 12. SMALL FLOATING NOTIFICATION POPUPS --- */
 .toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 16px;
+  right: 16px;
   z-index: 99999;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   pointer-events: none;
-  max-width: 420px;
+  max-width: 360px;
   width: auto;
 }
 
 .toast {
   pointer-events: auto;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 18px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
   font-weight: 600;
-  line-height: 1.4;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
-  animation: toastSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  backdrop-filter: blur(8px);
+  line-height: 1.3;
+  box-shadow: 0 4px 14px -1px rgba(15, 23, 42, 0.15), 0 2px 4px -1px rgba(15, 23, 42, 0.06);
+  animation: toastPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-@keyframes toastSlideIn {
+@keyframes toastPopIn {
   from {
     opacity: 0;
-    transform: translateY(-16px) scale(0.95);
+    transform: translateY(-10px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -972,25 +979,68 @@ body {
   }
 }
 
+.toast-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.toast-text {
+  flex: 1;
+  color: var(--slate-800);
+  font-size: 12px;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--slate-400);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.toast-close:hover {
+  color: var(--slate-700);
+}
+
 .toast-success {
-  background-color: #ecfdf5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-  border-left: 4px solid #10b981;
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 1px solid #10b981;
+}
+.toast-success .toast-icon {
+  background-color: #10b981;
+  color: #ffffff;
 }
 
 .toast-error {
-  background-color: #fff1f2;
-  color: #9f1239;
-  border: 1px solid #fecdd3;
-  border-left: 4px solid #f43f5e;
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 1px solid #f43f5e;
+}
+.toast-error .toast-icon {
+  background-color: #f43f5e;
+  color: #ffffff;
 }
 
 .toast-info {
-  background-color: #eff6ff;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
-  border-left: 4px solid #3b82f6;
+  background-color: rgba(255, 255, 255, 0.96);
+  border: 1px solid #3b82f6;
+}
+.toast-info .toast-icon {
+  background-color: #3b82f6;
+  color: #ffffff;
 }
 
 /* RESPONSIVE BREAKPOINTS CONTRACT */

@@ -8,7 +8,7 @@ import { useApp } from '../../context/AppContext.jsx';
 
 export function AppShell({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { toast } = useApp();
+  const { toast, hideToast } = useApp();
 
   return (
     <div className="app-shell">
@@ -31,12 +31,22 @@ export function AppShell({ children }) {
         </main>
       </div>
 
-      {/* Toast Notification Container */}
+      {/* Compact Floating Toast Notification */}
       {toast && (
         <div className="toast-container" role="status" aria-live="polite">
           <div className={`toast toast-${toast.type || 'success'}`}>
-            <span style={{ fontSize: '16px' }}>{toast.type === 'error' ? '⚠️' : toast.type === 'info' ? 'ℹ️' : '✓'}</span>
-            <span style={{ flex: 1 }}>{toast.message}</span>
+            <span className="toast-icon">
+              {toast.type === 'error' ? '!' : toast.type === 'info' ? 'i' : '✓'}
+            </span>
+            <span className="toast-text">{toast.message}</span>
+            <button
+              type="button"
+              className="toast-close"
+              onClick={hideToast}
+              aria-label="Dismiss notification"
+            >
+              ×
+            </button>
           </div>
         </div>
       )}

@@ -19,9 +19,13 @@ export function AppProvider({ children }) {
     setSyncStatus(dbService.getSyncStatus());
   };
 
+  const hideToast = () => {
+    setToast(null);
+  };
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+    setTimeout(() => setToast(null), 3500);
   };
 
   // 1. Boot fetch authoritative Google Sheets data on application load
@@ -74,6 +78,7 @@ export function AppProvider({ children }) {
       notifications: Array.isArray(notifications) ? notifications : [],
       toast,
       showToast,
+      hideToast,
       refreshKey,
       triggerRefresh,
       syncStatus,
@@ -95,6 +100,7 @@ export function useApp() {
       notifications: [],
       toast: null,
       showToast: () => {},
+      hideToast: () => {},
       refreshKey: 0,
       triggerRefresh: () => {},
       syncStatus: {
